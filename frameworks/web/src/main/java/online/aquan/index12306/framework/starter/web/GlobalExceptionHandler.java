@@ -22,7 +22,6 @@ import cn.hutool.core.util.StrUtil;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
-
 import online.aquan.index12306.framework.starter.convention.errorcode.BaseErrorCode;
 import online.aquan.index12306.framework.starter.convention.exception.AbstractException;
 import online.aquan.index12306.framework.starter.convention.result.Result;
@@ -37,8 +36,6 @@ import java.util.Optional;
 
 /**
  * 全局异常处理器
- *
- * @公众号：马丁玩编程，回复：加群，添加马哥微信（备注：12306）获取项目资料
  */
 @Slf4j
 @RestControllerAdvice

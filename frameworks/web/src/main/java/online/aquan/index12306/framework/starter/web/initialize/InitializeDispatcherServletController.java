@@ -25,8 +25,6 @@ import static online.aquan.index12306.framework.starter.web.config.WebAutoConfig
 
 /**
  * 初始化 {@link org.springframework.web.servlet.DispatcherServlet}
- *
- * @公众号：马丁玩编程，回复：加群，添加马哥微信（备注：12306）获取项目资料
  */
 @Slf4j(topic = "Initialize DispatcherServlet")
 @RestController
