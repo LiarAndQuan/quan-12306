@@ -18,15 +18,13 @@
 package online.aquan.index12306.framework.starter.database.handler;
 
 import com.baomidou.mybatisplus.core.handlers.MetaObjectHandler;
-import online.aquan.index12306.framework.starter.common.enums.DelEnum;
 import org.apache.ibatis.reflection.MetaObject;
+import online.aquan.index12306.framework.starter.common.enums.DelEnum;
 
 import java.util.Date;
 
 /**
  * 元数据处理器
- *
- * @公众号：马丁玩编程，回复：加群，添加马哥微信（备注：12306）获取项目资料
  */
 public class MyMetaObjectHandler implements MetaObjectHandler {
 

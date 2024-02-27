@@ -1,4 +1,4 @@
-package online.aquan.index12306.framework.starter.database.toolkit;/*
+/*
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.
@@ -15,7 +15,7 @@ package online.aquan.index12306.framework.starter.database.toolkit;/*
  * limitations under the License.
  */
 
-
+package online.aquan.index12306.framework.starter.database.toolkit;
 
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
@@ -29,8 +29,6 @@ import java.util.stream.Collectors;
 
 /**
  * 分页工具类
- *
- * @公众号：马丁玩编程，回复：加群，添加马哥微信（备注：12306）获取项目资料
  */
 public class PageUtil {
 
