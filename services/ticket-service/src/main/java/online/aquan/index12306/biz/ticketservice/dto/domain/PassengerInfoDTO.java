@@ -15,63 +15,40 @@
  * limitations under the License.
  */
 
-package online.aquan.index12306.biz.userservice.dto.resp;
+package online.aquan.index12306.biz.ticketservice.dto.domain;
 
 import lombok.Data;
+import lombok.experimental.Accessors;
 
 /**
- * 用户查询返回参数
+ * 乘车人信息实体
  */
 @Data
-public class UserQueryRespDTO {
+@Accessors(chain = true)
+public class PassengerInfoDTO {
 
     /**
-     * 用户名
+     * 乘车人 ID
      */
-    private String username;
+    private String passengerId;
 
     /**
-     * 真实姓名
+     * 乘车人姓名
      */
     private String realName;
 
     /**
-     * 证件类型
+     * 乘车人证件类型
      */
     private Integer idType;
 
     /**
-     * 证件号
+     * 乘车人证件号
      */
     private String idCard;
 
     /**
-     * 手机号
+     * 乘车人手机号
      */
     private String phone;
-
-    /**
-     * 邮箱
-     */
-    private String mail;
-
-    /**
-     * 旅客类型
-     */
-    private Integer userType;
-
-    /**
-     * 审核状态
-     */
-    private Integer verifyStatus;
-
-    /**
-     * 邮编
-     */
-    private String postCode;
-
-    /**
-     * 地址
-     */
-    private String address;
 }

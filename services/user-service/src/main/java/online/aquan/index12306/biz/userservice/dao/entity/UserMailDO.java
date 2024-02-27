@@ -15,15 +15,30 @@
  * limitations under the License.
  */
 
-package online.aquan.index12306.biz.userservice.dto.req;
+package online.aquan.index12306.biz.userservice.dao.entity;
 
+import com.baomidou.mybatisplus.annotation.TableName;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
+import online.aquan.index12306.framework.starter.database.base.BaseDO;
 
 /**
- * 用户注册请求参数
+ * 用户邮箱表实体对象
+ *
  */
 @Data
-public class UserRegisterReqDTO {
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
+@TableName("t_user_mail")
+public class UserMailDO extends BaseDO {
+
+    /**
+     * id
+     */
+    private Long id;
 
     /**
      * 用户名
@@ -31,52 +46,12 @@ public class UserRegisterReqDTO {
     private String username;
 
     /**
-     * 密码
-     */
-    private String password;
-
-    /**
-     * 真实姓名
-     */
-    private String realName;
-
-    /**
-     * 证件类型
-     */
-    private Integer idType;
-
-    /**
-     * 证件号
-     */
-    private String idCard;
-
-    /**
-     * 手机号
-     */
-    private String phone;
-
-    /**
-     * 邮箱
+     * 邮箱号
      */
     private String mail;
 
     /**
-     * 旅客类型
+     * 注销时间戳
      */
-    private Integer userType;
-
-    /**
-     * 审核状态
-     */
-    private Integer verifyState;
-
-    /**
-     * 邮编
-     */
-    private String postCode;
-
-    /**
-     * 地址
-     */
-    private String address;
+    private Long deletionTime;
 }

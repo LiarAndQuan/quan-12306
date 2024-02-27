@@ -15,40 +15,34 @@
  * limitations under the License.
  */
 
-package online.aquan.index12306.biz.userservice.service;
-
-
-import online.aquan.index12306.biz.userservice.dto.req.PassengerReqDTO;
-import online.aquan.index12306.biz.userservice.dto.resp.PassengerRespDTO;
+package online.aquan.index12306.biz.ticketservice.service;
 
 import java.util.List;
 
 /**
- * 乘车人接口层
+ * 座位接口层
  *
  * @公众号：马丁玩编程，回复：加群，添加马哥微信（备注：12306）获取项目资料
  */
-public interface PassengerService {
+public interface SeatService {
 
     /**
-     * 根据用户名查询乘车人列表
+     * 获取列车车厢中可用的座位集合
      *
-     * @param username 用户名
-     * @return 乘车人返回列表
+     * @param trainId        列车 ID
+     * @param carriageNumber 车厢号
+     * @return 可用座位集合
      */
-    List<PassengerRespDTO> listPassengerQuery(String username);
+    List<String> listAvailableSeat(String trainId, String carriageNumber);
 
     /**
-     * 新增乘车人
+     * 获取列车车厢余票集合
      *
-     * @param requestParam 乘车人信息
+     * @param trainId           列车 ID
+     * @param departure         出发站
+     * @param arrival           到达站
+     * @param trainCarriageList 车厢编号集合
+     * @return 车厢余票集合
      */
-    void savePassenger(PassengerReqDTO requestParam);
-
-    /**
-     * 修改乘车人
-     *
-     * @param requestParam 乘车人信息
-     */
-    void updatePassenger(PassengerReqDTO requestParam);
+    List<Integer> listSeatRemainingTicket(String trainId, String departure, String arrival, List<String> trainCarriageList);
 }

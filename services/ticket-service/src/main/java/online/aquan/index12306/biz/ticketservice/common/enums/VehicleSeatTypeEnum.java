@@ -15,48 +15,49 @@
  * limitations under the License.
  */
 
-package online.aquan.index12306.biz.userservice.dto.req;
+package online.aquan.index12306.biz.ticketservice.common.enums;
 
-import lombok.Data;
+import lombok.Getter;
+import lombok.RequiredArgsConstructor;
+
+import java.util.Arrays;
+import java.util.Objects;
 
 /**
- * 乘车人添加&修改请求参数
+ * 交通工具座位类型
  */
-@Data
-public class PassengerReqDTO {
+@RequiredArgsConstructor
+public enum VehicleSeatTypeEnum {
 
     /**
-     * 乘车人id
+     * 商务座
      */
-    private String id;
+    BUSINESS_CLASS(0, "BUSINESS_CLASS"),
 
     /**
-     * 用户名
+     * 一等座
      */
-    private String username;
+    FIRST_CLASS(1, "FIRST_CLASS"),
 
     /**
-     * 真实姓名
+     * 二等座
      */
-    private String realName;
+    SECOND_CLASS(2, "SECOND_CLASS");
+
+    @Getter
+    private final Integer code;
+
+    @Getter
+    private final String name;
 
     /**
-     * 证件类型
+     * 根据编码查找名称
      */
-    private Integer idType;
-
-    /**
-     * 证件号码
-     */
-    private String idCard;
-
-    /**
-     * 优惠类型
-     */
-    private Integer discountType;
-
-    /**
-     * 手机号
-     */
-    private String phone;
+    public static String findNameByCode(Integer code) {
+        return Arrays.stream(VehicleSeatTypeEnum.values())
+                .filter(each -> Objects.equals(each.getCode(), code))
+                .findFirst()
+                .map(VehicleSeatTypeEnum::getName)
+                .orElse(null);
+    }
 }

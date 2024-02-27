@@ -15,63 +15,27 @@
  * limitations under the License.
  */
 
-package online.aquan.index12306.biz.userservice.dao.entity;
+package online.aquan.index12306.biz.ticketservice.dto.domain;
 
-import com.baomidou.mybatisplus.annotation.TableName;
+import lombok.AllArgsConstructor;
 import lombok.Data;
-import online.aquan.index12306.framework.starter.database.base.BaseDO;
-
-import java.util.Date;
+import lombok.NoArgsConstructor;
 
 /**
- * 乘车人实体
+ * 站点路线实体
  */
 @Data
-@TableName("t_passenger")
-public class PassengerDO extends BaseDO {
+@NoArgsConstructor
+@AllArgsConstructor
+public class RouteDTO {
 
     /**
-     * id
+     * 出发站点
      */
-    private Long id;
+    private String startStation;
 
     /**
-     * 用户名
+     * 目的站点
      */
-    private String username;
-
-    /**
-     * 真实姓名
-     */
-    private String realName;
-
-    /**
-     * 证件类型
-     */
-    private Integer idType;
-
-    /**
-     * 证件号码
-     */
-    private String idCard;
-
-    /**
-     * 优惠类型
-     */
-    private Integer discountType;
-
-    /**
-     * 手机号
-     */
-    private String phone;
-
-    /**
-     * 添加日期
-     */
-    private Date createDate;
-
-    /**
-     * 审核状态
-     */
-    private Integer verifyStatus;
+    private String endStation;
 }

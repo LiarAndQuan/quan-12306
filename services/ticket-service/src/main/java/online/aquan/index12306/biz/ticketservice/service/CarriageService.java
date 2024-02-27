@@ -15,14 +15,23 @@
  * limitations under the License.
  */
 
-package online.aquan.index12306.biz.userservice.dao.mapper;
+package online.aquan.index12306.biz.ticketservice.service;
 
-
-import com.baomidou.mybatisplus.core.mapper.BaseMapper;
-import online.aquan.index12306.biz.userservice.dao.entity.PassengerDO;
+import java.util.List;
 
 /**
- * 乘车人持久层
+ * 列车车厢接口层
+ *
+ * @公众号：马丁玩编程，回复：加群，添加马哥微信（备注：12306）获取项目资料
  */
-public interface PassengerMapper extends BaseMapper<PassengerDO> {
+public interface CarriageService {
+
+    /**
+     * 查询列车车厢号集合
+     *
+     * @param trainId      列车 ID
+     * @param carriageType 车厢类型
+     * @return 车厢号集合
+     */
+    List<String> listCarriageNumber(String trainId, Integer carriageType);
 }

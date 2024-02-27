@@ -15,62 +15,54 @@
  * limitations under the License.
  */
 
-package online.aquan.index12306.biz.userservice.dto.resp;
+package online.aquan.index12306.biz.ticketservice.common.enums;
 
-import com.fasterxml.jackson.annotation.JsonFormat;
-import lombok.Data;
+import lombok.Getter;
+import lombok.RequiredArgsConstructor;
 
-import java.util.Date;
+import java.util.Arrays;
+import java.util.Objects;
 
 /**
- * 乘车人返回参数
+ * 交通工具类型
  */
-@Data
-public class PassengerRespDTO {
+@RequiredArgsConstructor
+public enum VehicleTypeEnum {
 
     /**
-     * 乘车人id
+     * 高铁
      */
-    private String id;
+    HIGH_SPEED_RAIN(0, "HIGH_SPEED_RAIN"),
 
     /**
-     * 用户名
+     * 火车
      */
-    private String username;
+    TRAIN(1, "TRAIN"),
 
     /**
-     * 真实姓名
+     * 汽车
      */
-    private String realName;
+    CAR(2, "CAR"),
 
     /**
-     * 证件类型
+     * 飞机
      */
-    private Integer idType;
+    AIRPLANE(3, "AIRPLANE");
+
+    @Getter
+    private final Integer code;
+
+    @Getter
+    private final String name;
 
     /**
-     * 证件号码
+     * 根据编码查找名称
      */
-    private String idCard;
-
-    /**
-     * 优惠类型
-     */
-    private Integer discountType;
-
-    /**
-     * 手机号
-     */
-    private String phone;
-
-    /**
-     * 添加日期
-     */
-    @JsonFormat(pattern = "yyyy-MM-dd", timezone = "GMT+8")
-    private Date createDate;
-
-    /**
-     * 审核状态
-     */
-    private Integer verifyStatus;
+    public static String findNameByCode(Integer code) {
+        return Arrays.stream(VehicleTypeEnum.values())
+                .filter(each -> Objects.equals(each.getCode(), code))
+                .findFirst()
+                .map(VehicleTypeEnum::getName)
+                .orElse(null);
+    }
 }

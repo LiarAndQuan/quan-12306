@@ -15,15 +15,30 @@
  * limitations under the License.
  */
 
-package online.aquan.index12306.biz.userservice.dto.resp;
+package online.aquan.index12306.biz.userservice.dao.entity;
 
+import com.baomidou.mybatisplus.annotation.TableName;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
+import online.aquan.index12306.framework.starter.database.base.BaseDO;
 
 /**
- * 用户注册返回参数
+ * 用户手机号实体对象
+ *
  */
 @Data
-public class UserRegisterRespDTO {
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
+@TableName("t_user_phone")
+public class UserPhoneDO extends BaseDO {
+
+    /**
+     * id
+     */
+    private Long id;
 
     /**
      * 用户名
@@ -31,12 +46,12 @@ public class UserRegisterRespDTO {
     private String username;
 
     /**
-     * 真实姓名
-     */
-    private String realName;
-
-    /**
      * 手机号
      */
     private String phone;
+
+    /**
+     * 注销时间戳
+     */
+    private Long deletionTime;
 }
