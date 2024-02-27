@@ -20,11 +20,13 @@ import online.aquan.index12306.framework.starter.convention.exception.ClientExce
 import online.aquan.index12306.framework.starter.convention.exception.ServiceException;
 import online.aquan.index12306.frameworks.starter.user.core.UserInfoDTO;
 import online.aquan.index12306.frameworks.starter.user.toolkit.JWTUtil;
+import org.springframework.stereotype.Service;
 
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 
 @RequiredArgsConstructor
+@Service
 public class UserLoginServiceImpl extends ServiceImpl<UserMapper, UserDO> implements UserLoginService {
     
     private final UserMailMapper userMailMapper;
