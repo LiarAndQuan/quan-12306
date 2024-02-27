@@ -27,8 +27,6 @@ import org.springframework.context.annotation.Import;
 
 /**
  * 分布式 ID 自动装配
- *
- * @公众号：马丁玩编程，回复：加群，添加马哥微信（备注：12306）获取项目资料
  */
 @Import(ApplicationContextHolder.class)
 public class DistributedIdAutoConfiguration {
@@ -37,7 +35,7 @@ public class DistributedIdAutoConfiguration {
      * 本地 Redis 构建雪花 WorkId 选择器
      */
     @Bean
-    @ConditionalOnProperty("spring.redis.host")
+    @ConditionalOnProperty("spring.data.redis.host")
     public LocalRedisWorkIdChoose redisWorkIdChoose() {
         return new LocalRedisWorkIdChoose();
     }

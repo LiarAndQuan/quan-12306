@@ -23,10 +23,6 @@ import online.aquan.index12306.framework.starter.distributedid.handler.IdGenerat
 
 /**
  * 分布式雪花 ID 生成器
- *
- * @author chen.ma
- * @github <a href="https://github.com/opengoofy" />
- * @公众号 马丁玩编程，关注回复：资料，领取后端技术专家成长手册
  */
 public final class SnowflakeIdUtil {
 
@@ -92,9 +88,30 @@ public final class SnowflakeIdUtil {
     }
 
     /**
+     * 根据 {@param serviceId} 生成字符串类型雪花算法 ID
+     */
+    public static String nextIdStrByService(String resource, long serviceId) {
+        return IdGeneratorManager.getIdGenerator(resource).nextIdStr(serviceId);
+    }
+
+    /**
+     * 根据 {@param serviceId} 生成字符串类型雪花算法 ID
+     */
+    public static String nextIdStrByService(String resource, String serviceId) {
+        return IdGeneratorManager.getIdGenerator(resource).nextIdStr(serviceId);
+    }
+
+    /**
      * 解析雪花算法生成的 ID 为对象
      */
     public static SnowflakeIdInfo parseSnowflakeServiceId(String snowflakeId) {
         return IdGeneratorManager.getDefaultServiceIdGenerator().parseSnowflakeId(Long.parseLong(snowflakeId));
+    }
+
+    /**
+     * 解析雪花算法生成的 ID 为对象
+     */
+    public static SnowflakeIdInfo parseSnowflakeServiceId(String resource, String snowflakeId) {
+        return IdGeneratorManager.getIdGenerator(resource).parseSnowflakeId(Long.parseLong(snowflakeId));
     }
 }
