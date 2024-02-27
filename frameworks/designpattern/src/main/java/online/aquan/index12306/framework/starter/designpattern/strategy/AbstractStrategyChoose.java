@@ -19,7 +19,7 @@ package online.aquan.index12306.framework.starter.designpattern.strategy;
 
 import online.aquan.index12306.framework.starter.bases.ApplicationContextHolder;
 import online.aquan.index12306.framework.starter.bases.init.ApplicationInitializingEvent;
-import org.opengoofy.index12306.framework.starter.convention.exception.ServiceException;
+import online.aquan.index12306.framework.starter.convention.exception.ServiceException;
 import org.springframework.context.ApplicationListener;
 import org.springframework.util.StringUtils;
 
@@ -36,7 +36,7 @@ public class AbstractStrategyChoose implements ApplicationListener<ApplicationIn
     /**
      * 执行策略集合
      */
-    private final Map<String, org.opengoofy.index12306.framework.starter.designpattern.strategy.AbstractExecuteStrategy> abstractExecuteStrategyMap = new HashMap<>();
+    private final Map<String, AbstractExecuteStrategy> abstractExecuteStrategyMap = new HashMap<>();
 
     /**
      * 根据 mark 查询具体策略
@@ -45,7 +45,7 @@ public class AbstractStrategyChoose implements ApplicationListener<ApplicationIn
      * @param predicateFlag 匹配范解析标识
      * @return 实际执行策略
      */
-    public org.opengoofy.index12306.framework.starter.designpattern.strategy.AbstractExecuteStrategy choose(String mark, Boolean predicateFlag) {
+    public AbstractExecuteStrategy choose(String mark, Boolean predicateFlag) {
         if (predicateFlag != null && predicateFlag) {
             return abstractExecuteStrategyMap.values().stream()
                     .filter(each -> StringUtils.hasText(each.patternMatchMark()))
@@ -65,7 +65,7 @@ public class AbstractStrategyChoose implements ApplicationListener<ApplicationIn
      * @param <REQUEST>    执行策略入参范型
      */
     public <REQUEST> void chooseAndExecute(String mark, REQUEST requestParam) {
-        org.opengoofy.index12306.framework.starter.designpattern.strategy.AbstractExecuteStrategy executeStrategy = choose(mark, null);
+        AbstractExecuteStrategy executeStrategy = choose(mark, null);
         executeStrategy.execute(requestParam);
     }
 
@@ -78,7 +78,7 @@ public class AbstractStrategyChoose implements ApplicationListener<ApplicationIn
      * @param <REQUEST>     执行策略入参范型
      */
     public <REQUEST> void chooseAndExecute(String mark, REQUEST requestParam, Boolean predicateFlag) {
-        org.opengoofy.index12306.framework.starter.designpattern.strategy.AbstractExecuteStrategy executeStrategy = choose(mark, predicateFlag);
+        AbstractExecuteStrategy executeStrategy = choose(mark, predicateFlag);
         executeStrategy.execute(requestParam);
     }
 
@@ -92,15 +92,15 @@ public class AbstractStrategyChoose implements ApplicationListener<ApplicationIn
      * @return
      */
     public <REQUEST, RESPONSE> RESPONSE chooseAndExecuteResp(String mark, REQUEST requestParam) {
-        org.opengoofy.index12306.framework.starter.designpattern.strategy.AbstractExecuteStrategy executeStrategy = choose(mark, null);
+        AbstractExecuteStrategy executeStrategy = choose(mark, null);
         return (RESPONSE) executeStrategy.executeResp(requestParam);
     }
 
     @Override
     public void onApplicationEvent(ApplicationInitializingEvent event) {
-        Map<String, org.opengoofy.index12306.framework.starter.designpattern.strategy.AbstractExecuteStrategy> actual = ApplicationContextHolder.getBeansOfType(org.opengoofy.index12306.framework.starter.designpattern.strategy.AbstractExecuteStrategy.class);
+        Map<String, AbstractExecuteStrategy> actual = ApplicationContextHolder.getBeansOfType(AbstractExecuteStrategy.class);
         actual.forEach((beanName, bean) -> {
-            org.opengoofy.index12306.framework.starter.designpattern.strategy.AbstractExecuteStrategy beanExist = abstractExecuteStrategyMap.get(bean.mark());
+            AbstractExecuteStrategy beanExist = abstractExecuteStrategyMap.get(bean.mark());
             if (beanExist != null) {
                 throw new ServiceException(String.format("[%s] Duplicate execution policy", bean.mark()));
             }
