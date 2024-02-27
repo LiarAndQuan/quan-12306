@@ -5,6 +5,7 @@ import jakarta.validation.constraints.NotEmpty;
 import lombok.RequiredArgsConstructor;
 import online.aquan.index12306.biz.userservice.dto.resp.UserQueryActualRespDTO;
 import online.aquan.index12306.biz.userservice.dto.resp.UserQueryRespDTO;
+import online.aquan.index12306.biz.userservice.service.UserLoginService;
 import online.aquan.index12306.biz.userservice.service.UserService;
 import online.aquan.index12306.framework.starter.convention.result.Result;
 import online.aquan.index12306.framework.starter.web.Results;
@@ -17,6 +18,7 @@ import org.springframework.web.bind.annotation.RestController;
 public class UserInfoController {
     
     private final UserService userService;
+    private final UserLoginService userLoginService;
     
     /**
      * 根据用户名查询用户脱敏信息
@@ -33,4 +35,13 @@ public class UserInfoController {
     public Result<UserQueryActualRespDTO> queryActualUserByUsername(@RequestParam("username") @NotEmpty String username) {
         return Results.success(userService.queryActualUserByUsername(username));
     }
+
+    /**
+     * 检查用户名是否已存在
+     */
+    @GetMapping("/api/user-service/has-username")
+    public Result<Boolean> hasUsername(@RequestParam("username") @NotEmpty String username) {
+        return Results.success(userLoginService.hasUsername(username));
+    }
+    
 }

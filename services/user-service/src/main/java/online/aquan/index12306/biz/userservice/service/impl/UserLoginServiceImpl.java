@@ -20,10 +20,15 @@ import online.aquan.index12306.framework.starter.convention.exception.ClientExce
 import online.aquan.index12306.framework.starter.convention.exception.ServiceException;
 import online.aquan.index12306.frameworks.starter.user.core.UserInfoDTO;
 import online.aquan.index12306.frameworks.starter.user.toolkit.JWTUtil;
+import org.redisson.api.RBloomFilter;
+import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
 
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
+
+import static online.aquan.index12306.biz.userservice.common.constant.RedisKeyConstant.USER_REGISTER_REUSE_SHARDING;
+import static online.aquan.index12306.biz.userservice.toolkit.UserReuseUtil.hashShardingIdx;
 
 @RequiredArgsConstructor
 @Service
@@ -33,6 +38,7 @@ public class UserLoginServiceImpl extends ServiceImpl<UserMapper, UserDO> implem
     private final UserPhoneMapper userPhoneMapper;
     private final UserMapper userMapper;
     private final DistributedCache distributedCache;
+    private final RBloomFilter<String> userRegisterCachePenetrationBloomFilter;
     
     
     @Override
@@ -96,5 +102,16 @@ public class UserLoginServiceImpl extends ServiceImpl<UserMapper, UserDO> implem
         if (StrUtil.isNotBlank(accessToken)) {
             distributedCache.delete(accessToken);
         }
+    }
+
+    @Override
+    public Boolean hasUsername(String username) {
+        boolean hasUsername = userRegisterCachePenetrationBloomFilter.contains(username);
+        //如果布隆过滤器中存在这个username,我们查询redis中的set结构看这个用户名是否可用
+        if (hasUsername) {
+            StringRedisTemplate instance = (StringRedisTemplate) distributedCache.getInstance();
+            return instance.opsForSet().isMember(USER_REGISTER_REUSE_SHARDING + hashShardingIdx(username), username);
+        }
+        return true;
     }
 }
