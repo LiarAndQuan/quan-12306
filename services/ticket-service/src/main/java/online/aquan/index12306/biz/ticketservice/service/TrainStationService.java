@@ -15,20 +15,23 @@
  * limitations under the License.
  */
 
-package online.aquan.index12306.biz.ticketservice;
+package online.aquan.index12306.biz.ticketservice.service;
 
-import org.mybatis.spring.annotation.MapperScan;
-import org.springframework.boot.SpringApplication;
-import org.springframework.boot.autoconfigure.SpringBootApplication;
+
+import online.aquan.index12306.biz.ticketservice.dto.resp.TrainStationQueryRespDTO;
+
+import java.util.List;
 
 /**
- * 购票服务应用启动器
+ * 列车站点接口层
  */
-@SpringBootApplication
-@MapperScan("online.aquan.index12306.biz.ticketservice.dao.mapper")
-public class TicketServiceApplication {
+public interface TrainStationService {
 
-    public static void main(String[] args) {
-        SpringApplication.run(TicketServiceApplication.class, args);
-    }
+    /**
+     * 根据列车 ID 查询站点信息
+     *
+     * @param trainId 列车 ID
+     * @return 列车经停站信息
+     */
+    List<TrainStationQueryRespDTO> listTrainStationQuery(String trainId);
 }

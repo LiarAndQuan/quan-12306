@@ -15,20 +15,46 @@
  * limitations under the License.
  */
 
-package online.aquan.index12306.biz.ticketservice;
+package online.aquan.index12306.biz.ticketservice.dao.entity;
 
-import org.mybatis.spring.annotation.MapperScan;
-import org.springframework.boot.SpringApplication;
-import org.springframework.boot.autoconfigure.SpringBootApplication;
+import com.baomidou.mybatisplus.annotation.TableName;
+import lombok.Data;
+import online.aquan.index12306.framework.starter.database.base.BaseDO;
 
 /**
- * 购票服务应用启动器
+ * 车站实体
  */
-@SpringBootApplication
-@MapperScan("online.aquan.index12306.biz.ticketservice.dao.mapper")
-public class TicketServiceApplication {
+@Data
+@TableName("t_station")
+public class StationDO extends BaseDO {
 
-    public static void main(String[] args) {
-        SpringApplication.run(TicketServiceApplication.class, args);
-    }
+    /**
+     * id
+     */
+    private Long id;
+
+    /**
+     * 车站编码
+     */
+    private String code;
+
+    /**
+     * 车站名称
+     */
+    private String name;
+
+    /**
+     * 拼音
+     */
+    private String spell;
+
+    /**
+     * 地区编号
+     */
+    private String region;
+
+    /**
+     * 地区名称
+     */
+    private String regionName;
 }

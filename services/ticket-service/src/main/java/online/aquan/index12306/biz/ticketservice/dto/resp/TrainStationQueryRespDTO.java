@@ -15,20 +15,43 @@
  * limitations under the License.
  */
 
-package online.aquan.index12306.biz.ticketservice;
+package online.aquan.index12306.biz.ticketservice.dto.resp;
 
-import org.mybatis.spring.annotation.MapperScan;
-import org.springframework.boot.SpringApplication;
-import org.springframework.boot.autoconfigure.SpringBootApplication;
+import com.fasterxml.jackson.annotation.JsonFormat;
+import lombok.Data;
+
+import java.util.Date;
 
 /**
- * 购票服务应用启动器
+ * 列车站点查询响应参数
  */
-@SpringBootApplication
-@MapperScan("online.aquan.index12306.biz.ticketservice.dao.mapper")
-public class TicketServiceApplication {
+@Data
+public class TrainStationQueryRespDTO {
 
-    public static void main(String[] args) {
-        SpringApplication.run(TicketServiceApplication.class, args);
-    }
+    /**
+     * 站序
+     */
+    private String sequence;
+
+    /**
+     * 站名
+     */
+    private String departure;
+
+    /**
+     * 到站时间
+     */
+    @JsonFormat(pattern = "HH:mm", timezone = "GMT+8")
+    private Date arrivalTime;
+
+    /**
+     * 出发时间
+     */
+    @JsonFormat(pattern = "HH:mm", timezone = "GMT+8")
+    private Date departureTime;
+
+    /**
+     * 停留时间
+     */
+    private Integer stopoverTime;
 }

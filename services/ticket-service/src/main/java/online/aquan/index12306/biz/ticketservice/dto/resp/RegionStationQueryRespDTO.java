@@ -15,20 +15,28 @@
  * limitations under the License.
  */
 
-package online.aquan.index12306.biz.ticketservice;
+package online.aquan.index12306.biz.ticketservice.dto.resp;
 
-import org.mybatis.spring.annotation.MapperScan;
-import org.springframework.boot.SpringApplication;
-import org.springframework.boot.autoconfigure.SpringBootApplication;
+import lombok.Data;
 
 /**
- * 购票服务应用启动器
+ * 地区&站点分页查询响应参数
  */
-@SpringBootApplication
-@MapperScan("online.aquan.index12306.biz.ticketservice.dao.mapper")
-public class TicketServiceApplication {
+@Data
+public class RegionStationQueryRespDTO {
 
-    public static void main(String[] args) {
-        SpringApplication.run(TicketServiceApplication.class, args);
-    }
+    /**
+     * 名称
+     */
+    private String name;
+
+    /**
+     * 地区编码
+     */
+    private String code;
+
+    /**
+     * 拼音
+     */
+    private String spell;
 }

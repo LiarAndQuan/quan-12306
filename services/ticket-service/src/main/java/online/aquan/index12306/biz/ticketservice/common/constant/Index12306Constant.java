@@ -15,20 +15,15 @@
  * limitations under the License.
  */
 
-package online.aquan.index12306.biz.ticketservice;
-
-import org.mybatis.spring.annotation.MapperScan;
-import org.springframework.boot.SpringApplication;
-import org.springframework.boot.autoconfigure.SpringBootApplication;
+package online.aquan.index12306.biz.ticketservice.common.constant;
 
 /**
- * 购票服务应用启动器
+ * 系统级公共常量
  */
-@SpringBootApplication
-@MapperScan("online.aquan.index12306.biz.ticketservice.dao.mapper")
-public class TicketServiceApplication {
+public final class Index12306Constant {
 
-    public static void main(String[] args) {
-        SpringApplication.run(TicketServiceApplication.class, args);
-    }
+    /**
+     * 提前买票天数
+     */
+    public static final int ADVANCE_TICKET_DAY = 15;
 }

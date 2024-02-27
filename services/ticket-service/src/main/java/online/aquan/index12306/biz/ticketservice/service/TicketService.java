@@ -15,20 +15,23 @@
  * limitations under the License.
  */
 
-package online.aquan.index12306.biz.ticketservice;
+package online.aquan.index12306.biz.ticketservice.service;
 
-import org.mybatis.spring.annotation.MapperScan;
-import org.springframework.boot.SpringApplication;
-import org.springframework.boot.autoconfigure.SpringBootApplication;
+
+import online.aquan.index12306.biz.ticketservice.dto.req.TicketPageQueryReqDTO;
+import online.aquan.index12306.biz.ticketservice.dto.resp.TicketPageQueryRespDTO;
+import online.aquan.index12306.framework.starter.convention.page.PageResponse;
 
 /**
- * 购票服务应用启动器
+ * 车票接口
  */
-@SpringBootApplication
-@MapperScan("online.aquan.index12306.biz.ticketservice.dao.mapper")
-public class TicketServiceApplication {
+public interface TicketService {
 
-    public static void main(String[] args) {
-        SpringApplication.run(TicketServiceApplication.class, args);
-    }
+    /**
+     * 根据条件分页查询车票
+     *
+     * @param requestParam 分页查询车票请求参数
+     * @return 查询车票返回结果
+     */
+    PageResponse<TicketPageQueryRespDTO> pageListTicketQuery(TicketPageQueryReqDTO requestParam);
 }

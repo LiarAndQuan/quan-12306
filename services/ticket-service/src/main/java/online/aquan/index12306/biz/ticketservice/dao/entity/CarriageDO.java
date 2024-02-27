@@ -15,20 +15,41 @@
  * limitations under the License.
  */
 
-package online.aquan.index12306.biz.ticketservice;
+package online.aquan.index12306.biz.ticketservice.dao.entity;
 
-import org.mybatis.spring.annotation.MapperScan;
-import org.springframework.boot.SpringApplication;
-import org.springframework.boot.autoconfigure.SpringBootApplication;
+import com.baomidou.mybatisplus.annotation.TableName;
+import lombok.Data;
+import online.aquan.index12306.framework.starter.database.base.BaseDO;
 
 /**
- * 购票服务应用启动器
+ * 车厢实体
  */
-@SpringBootApplication
-@MapperScan("online.aquan.index12306.biz.ticketservice.dao.mapper")
-public class TicketServiceApplication {
+@Data
+@TableName("t_carriage")
+public class CarriageDO extends BaseDO {
 
-    public static void main(String[] args) {
-        SpringApplication.run(TicketServiceApplication.class, args);
-    }
+    /**
+     * id
+     */
+    private Long id;
+
+    /**
+     * 列车id
+     */
+    private Long trainId;
+
+    /**
+     * 车厢号
+     */
+    private String carriageNumber;
+
+    /**
+     * 车厢类型
+     */
+    private Integer carriageType;
+
+    /**
+     * 座位数
+     */
+    private Integer seatCount;
 }
