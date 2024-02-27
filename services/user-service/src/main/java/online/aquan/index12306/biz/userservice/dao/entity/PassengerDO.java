@@ -15,21 +15,25 @@
  * limitations under the License.
  */
 
-package online.aquan.index12306.biz.userservice.dto;
+package online.aquan.index12306.biz.userservice.dao.entity;
 
-import lombok.AllArgsConstructor;
+import com.baomidou.mybatisplus.annotation.TableName;
 import lombok.Data;
-import lombok.NoArgsConstructor;
+import online.aquan.index12306.framework.starter.database.base.BaseDO;
+
+import java.util.Date;
 
 /**
- * 用户登录请求参数
- *
- * @公众号：马丁玩编程，回复：加群，添加马哥微信（备注：12306）获取项目资料
+ * 乘车人实体
  */
 @Data
-@NoArgsConstructor
-@AllArgsConstructor
-public class UserLoginReqDTO {
+@TableName("t_passenger")
+public class PassengerDO extends BaseDO {
+
+    /**
+     * id
+     */
+    private Long id;
 
     /**
      * 用户名
@@ -37,7 +41,37 @@ public class UserLoginReqDTO {
     private String username;
 
     /**
-     * 密码
+     * 真实姓名
      */
-    private String password;
+    private String realName;
+
+    /**
+     * 证件类型
+     */
+    private Integer idType;
+
+    /**
+     * 证件号码
+     */
+    private String idCard;
+
+    /**
+     * 优惠类型
+     */
+    private Integer discountType;
+
+    /**
+     * 手机号
+     */
+    private String phone;
+
+    /**
+     * 添加日期
+     */
+    private Date createDate;
+
+    /**
+     * 审核状态
+     */
+    private Integer verifyStatus;
 }

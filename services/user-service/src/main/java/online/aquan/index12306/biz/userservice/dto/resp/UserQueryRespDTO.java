@@ -15,33 +15,20 @@
  * limitations under the License.
  */
 
-package online.aquan.index12306.biz.userservice.dao.entity;
+package online.aquan.index12306.biz.userservice.dto.resp;
 
-import com.baomidou.mybatisplus.annotation.TableName;
 import lombok.Data;
-import online.aquan.index12306.framework.starter.database.base.BaseDO;
 
 /**
- * 用户信息实体
+ * 用户查询返回参数
  */
 @Data
-@TableName("t_user")
-public class UserDO extends BaseDO {
-
-    /**
-     * id
-     */
-    private Long id;
+public class UserQueryRespDTO {
 
     /**
      * 用户名
      */
     private String username;
-
-    /**
-     * 密码
-     */
-    private String password;
 
     /**
      * 真实姓名

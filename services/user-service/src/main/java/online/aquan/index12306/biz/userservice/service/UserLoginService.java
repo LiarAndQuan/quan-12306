@@ -17,15 +17,14 @@
 
 package online.aquan.index12306.biz.userservice.service;
 
-import online.aquan.index12306.biz.userservice.dto.UserLoginReqDTO;
-import online.aquan.index12306.biz.userservice.dto.UserLoginRespDTO;
-import online.aquan.index12306.biz.userservice.dto.UserRegisterReqDTO;
-import online.aquan.index12306.biz.userservice.dto.UserRegisterRespDTO;
+
+import online.aquan.index12306.biz.userservice.dto.req.UserLoginReqDTO;
+import online.aquan.index12306.biz.userservice.dto.req.UserRegisterReqDTO;
+import online.aquan.index12306.biz.userservice.dto.resp.UserLoginRespDTO;
+import online.aquan.index12306.biz.userservice.dto.resp.UserRegisterRespDTO;
 
 /**
  * 用户登录接口
- *
- * @公众号：马丁玩编程，回复：加群，添加马哥微信（备注：12306）获取项目资料
  */
 public interface UserLoginService {
 

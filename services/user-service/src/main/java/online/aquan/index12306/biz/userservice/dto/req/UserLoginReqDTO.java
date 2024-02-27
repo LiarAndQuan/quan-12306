@@ -15,34 +15,27 @@
  * limitations under the License.
  */
 
-package online.aquan.index12306.biz.userservice.dto;
+package online.aquan.index12306.biz.userservice.dto.req;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
 /**
- * 用户登录返回参数
- *
- * @公众号：马丁玩编程，回复：加群，添加马哥微信（备注：12306）获取项目资料
+ * 用户登录请求参数
  */
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class UserLoginRespDTO {
+public class UserLoginReqDTO {
 
     /**
      * 用户名
      */
-    private String username;
+    private String usernameOrMailOrPhone;
 
     /**
-     * 真实姓名
+     * 密码
      */
-    private String realName;
-
-    /**
-     * Token
-     */
-    private String accessToken;
+    private String password;
 }

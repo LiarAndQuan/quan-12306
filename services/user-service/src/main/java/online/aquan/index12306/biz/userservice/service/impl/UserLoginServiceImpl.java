@@ -19,18 +19,15 @@ package online.aquan.index12306.biz.userservice.service.impl;
 
 import cn.hutool.core.util.StrUtil;
 import com.alibaba.fastjson2.JSON;
-
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
-
 import lombok.RequiredArgsConstructor;
-
 import online.aquan.index12306.biz.userservice.dao.entity.UserDO;
 import online.aquan.index12306.biz.userservice.dao.mapper.UserMapper;
-import online.aquan.index12306.biz.userservice.dto.UserLoginReqDTO;
-import online.aquan.index12306.biz.userservice.dto.UserLoginRespDTO;
-import online.aquan.index12306.biz.userservice.dto.UserRegisterReqDTO;
-import online.aquan.index12306.biz.userservice.dto.UserRegisterRespDTO;
+import online.aquan.index12306.biz.userservice.dto.req.UserLoginReqDTO;
+import online.aquan.index12306.biz.userservice.dto.req.UserRegisterReqDTO;
+import online.aquan.index12306.biz.userservice.dto.resp.UserLoginRespDTO;
+import online.aquan.index12306.biz.userservice.dto.resp.UserRegisterRespDTO;
 import online.aquan.index12306.biz.userservice.service.UserLoginService;
 import online.aquan.index12306.biz.userservice.toolkit.JWTUtil;
 import online.aquan.index12306.framework.starter.cache.DistributedCache;
@@ -43,26 +40,23 @@ import java.util.concurrent.TimeUnit;
 
 /**
  * 用户登录接口实现
- *
- * @公众号：马丁玩编程，回复：加群，添加马哥微信（备注：12306）获取项目资料
  */
 @Service
 @RequiredArgsConstructor
 public class UserLoginServiceImpl implements UserLoginService {
 
     private final UserMapper userMapper;
-
     private final DistributedCache distributedCache;
 
     @Override
     public UserLoginRespDTO login(UserLoginReqDTO requestParam) {
         LambdaQueryWrapper<UserDO> queryWrapper = Wrappers.lambdaQuery(UserDO.class)
-                .eq(UserDO::getUsername, requestParam.getUsername())
+                .eq(UserDO::getUsername, requestParam.getUsernameOrMailOrPhone())
                 .eq(UserDO::getPassword, requestParam.getPassword());
         UserDO userDO = userMapper.selectOne(queryWrapper);
         if (userDO != null) {
             String accessToken = JWTUtil.generateAccessToken(requestParam);
-            UserLoginRespDTO actual = new UserLoginRespDTO(requestParam.getUsername(), userDO.getRealName(), accessToken);
+            UserLoginRespDTO actual = new UserLoginRespDTO(requestParam.getUsernameOrMailOrPhone(), userDO.getRealName(), accessToken);
             distributedCache.put(accessToken, JSON.toJSONString(actual), 30, TimeUnit.MINUTES);
             return actual;
         }

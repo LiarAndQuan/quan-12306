@@ -18,9 +18,8 @@
 package online.aquan.index12306.biz.userservice.controller;
 
 import lombok.RequiredArgsConstructor;
-
-import online.aquan.index12306.biz.userservice.dto.UserLoginReqDTO;
-import online.aquan.index12306.biz.userservice.dto.UserLoginRespDTO;
+import online.aquan.index12306.biz.userservice.dto.req.UserLoginReqDTO;
+import online.aquan.index12306.biz.userservice.dto.resp.UserLoginRespDTO;
 import online.aquan.index12306.biz.userservice.service.UserLoginService;
 import online.aquan.index12306.framework.starter.convention.result.Result;
 import online.aquan.index12306.framework.starter.web.Results;
@@ -28,8 +27,6 @@ import org.springframework.web.bind.annotation.*;
 
 /**
  * 用户登录控制层
- *
- * @公众号：马丁玩编程，回复：加群，添加马哥微信（备注：12306）获取项目资料
  */
 @RestController
 @RequiredArgsConstructor

@@ -15,14 +15,22 @@
  * limitations under the License.
  */
 
-package online.aquan.index12306.biz.userservice.dao.mapper;
+package online.aquan.index12306.biz.userservice.service;
 
 
-import com.baomidou.mybatisplus.core.mapper.BaseMapper;
-import online.aquan.index12306.biz.userservice.dao.entity.UserDO;
+import jakarta.validation.constraints.NotEmpty;
+import online.aquan.index12306.biz.userservice.dto.resp.UserQueryRespDTO;
 
 /**
- * 用户信息持久层
+ * 用户信息接口层
  */
-public interface UserMapper extends BaseMapper<UserDO> {
+public interface UserService {
+
+    /**
+     * 根据用户名查询用户信息
+     *
+     * @param username 用户名
+     * @return 用户详细信息
+     */
+    UserQueryRespDTO queryUserByUsername(@NotEmpty String username);
 }

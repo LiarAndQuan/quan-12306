@@ -21,7 +21,7 @@ import com.alibaba.fastjson2.JSON;
 import com.google.common.collect.Maps;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
-import online.aquan.index12306.biz.userservice.dto.UserLoginReqDTO;
+import online.aquan.index12306.biz.userservice.dto.req.UserLoginReqDTO;
 
 import java.util.Date;
 import java.util.Map;
@@ -45,8 +45,10 @@ public final class JWTUtil {
      */
     public static String generateAccessToken(UserLoginReqDTO userInfo) {
         Map<String, Object> customerUserMap = Maps.newHashMap();
-        customerUserMap.put("username", userInfo.getUsername());
+        //将用户信息存入map中
+        customerUserMap.put("usernameOrMailOrPhone", userInfo.getUsernameOrMailOrPhone());
         customerUserMap.put("password", userInfo.getPassword());
+        //将得到的map用于构建jwt
         return Jwts.builder()
                 .signWith(SignatureAlgorithm.HS512, SECRET)
                 .setIssuedAt(new Date())

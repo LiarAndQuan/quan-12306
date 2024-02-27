@@ -19,10 +19,10 @@ package online.aquan.index12306.biz.userservice.dao.mapper;
 
 
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
-import online.aquan.index12306.biz.userservice.dao.entity.UserDO;
+import online.aquan.index12306.biz.userservice.dao.entity.PassengerDO;
 
 /**
- * 用户信息持久层
+ * 乘车人持久层
  */
-public interface UserMapper extends BaseMapper<UserDO> {
+public interface PassengerMapper extends BaseMapper<PassengerDO> {
 }
