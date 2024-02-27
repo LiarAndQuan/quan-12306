@@ -19,15 +19,22 @@ package online.aquan.index12306.framework.starter.designpattern.strategy;
 
 /**
  * 策略执行抽象
- *
- * @公众号：马丁玩编程，回复：加群，添加马哥微信（备注：12306）获取项目资料
  */
 public interface AbstractExecuteStrategy<REQUEST, RESPONSE> {
 
     /**
      * 执行策略标识
      */
-    String mark();
+    default String mark() {
+        return null;
+    }
+
+    /**
+     * 执行策略范匹配标识
+     */
+    default String patternMatchMark() {
+        return null;
+    }
 
     /**
      * 执行策略
