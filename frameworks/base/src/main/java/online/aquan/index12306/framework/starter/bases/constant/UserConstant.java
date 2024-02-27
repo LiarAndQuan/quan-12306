@@ -15,24 +15,30 @@
  * limitations under the License.
  */
 
-package online.aquan.index12306.framework.starter.bases.init;
-
-import org.springframework.context.ApplicationEvent;
+package online.aquan.index12306.framework.starter.bases.constant;
 
 /**
- * 应用初始化事件
- *
- * <p> 规约事件，通过此事件可以查看业务系统所有初始化行为
+ * 用户常量
  */
-public class ApplicationInitializingEvent extends ApplicationEvent {
+public final class UserConstant {
 
     /**
-     * Create a new {@code ApplicationEvent}.
-     *
-     * @param source the object on which the event initially occurred or with
-     *               which the event is associated (never {@code null})
+     * 用户 ID Key
      */
-    public ApplicationInitializingEvent(Object source) {
-        super(source);
-    }
+    public static final String USER_ID_KEY = "userId";
+
+    /**
+     * 用户名 Key
+     */
+    public static final String USER_NAME_KEY = "username";
+
+    /**
+     * 用户真实名称 Key
+     */
+    public static final String REAL_NAME_KEY = "realName";
+
+    /**
+     * 用户 Token Key
+     */
+    public static final String USER_TOKEN_KEY = "token";
 }
