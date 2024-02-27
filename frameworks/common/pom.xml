@@ -4,7 +4,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<parent>
 		<groupId>online.aquan.index12306</groupId>
-		<artifactId>index12306-frameworks</artifactId>
+		<artifactId>index12306-all</artifactId>
 		<version>1.0-SNAPSHOT</version>
 	</parent>
 

@@ -25,8 +25,6 @@ import java.util.List;
 
 /**
  * 环境工具类
- *
- * @公众号：马丁玩编程，回复：加群，添加马哥微信（备注：12306）获取项目资料
  */
 public class EnvironmentUtil {
 
@@ -36,6 +34,7 @@ public class EnvironmentUtil {
         ENVIRONMENT_LIST.add("dev");
         ENVIRONMENT_LIST.add("test");
     }
+
     /**
      * 判断当前是否为开发环境
      *
@@ -46,6 +45,7 @@ public class EnvironmentUtil {
         String propertyActive = configurableEnvironment.getProperty("spring.profiles.active", "dev");
         return ENVIRONMENT_LIST.stream().filter(each -> propertyActive.contains(each)).findFirst().isPresent();
     }
+
     /**
      * 判断当前是否为正式环境
      *

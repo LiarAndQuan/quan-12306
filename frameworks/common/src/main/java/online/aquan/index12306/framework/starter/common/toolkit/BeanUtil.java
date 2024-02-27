@@ -23,15 +23,17 @@ import com.github.dozermapper.core.loader.api.BeanMappingBuilder;
 import lombok.NoArgsConstructor;
 
 import java.lang.reflect.Array;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Optional;
+import java.util.Set;
 
 import static com.github.dozermapper.core.loader.api.TypeMappingOptions.mapEmptyString;
 import static com.github.dozermapper.core.loader.api.TypeMappingOptions.mapNull;
 
 /**
  * 对象属性复制工具类
- *
- * @公众号：马丁玩编程，回复：加群，添加马哥微信（备注：12306）获取项目资料
  */
 @NoArgsConstructor(access = lombok.AccessLevel.PRIVATE)
 public class BeanUtil {
