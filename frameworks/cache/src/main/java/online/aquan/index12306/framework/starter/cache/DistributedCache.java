@@ -18,19 +18,16 @@
 package online.aquan.index12306.framework.starter.cache;
 
 import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.NotBlank;
 import online.aquan.index12306.framework.starter.cache.core.CacheGetFilter;
 import online.aquan.index12306.framework.starter.cache.core.CacheGetIfAbsent;
 import online.aquan.index12306.framework.starter.cache.core.CacheLoader;
-import org.hibernate.validator.constraints.NotBlank;
-
 import org.redisson.api.RBloomFilter;
 
 import java.util.concurrent.TimeUnit;
 
 /**
  * 分布式缓存
- *
- * @公众号：马丁玩编程，回复：加群，添加马哥微信（备注：12306）获取项目资料
  */
 public interface DistributedCache extends Cache {
 

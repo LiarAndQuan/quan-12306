@@ -18,14 +18,12 @@
 package online.aquan.index12306.framework.starter.cache;
 
 import jakarta.validation.constraints.NotNull;
-import org.hibernate.validator.constraints.NotBlank;
+import jakarta.validation.constraints.NotBlank;
 
 import java.util.Collection;
 
 /**
  * 缓存接口
- *
- * @公众号：马丁玩编程，回复：加群，添加马哥微信（备注：12306）获取项目资料
  */
 public interface Cache {
 

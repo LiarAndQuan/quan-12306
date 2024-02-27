@@ -29,7 +29,6 @@ import online.aquan.index12306.framework.starter.cache.core.CacheGetIfAbsent;
 import online.aquan.index12306.framework.starter.cache.core.CacheLoader;
 import online.aquan.index12306.framework.starter.cache.toolkit.CacheUtil;
 import online.aquan.index12306.framework.starter.cache.toolkit.FastJson2Util;
-
 import org.redisson.api.RBloomFilter;
 import org.redisson.api.RLock;
 import org.redisson.api.RedissonClient;
@@ -45,8 +44,6 @@ import java.util.concurrent.TimeUnit;
 /**
  * 分布式缓存之操作 Redis 模版代理
  * 底层通过 {@link RedissonClient}、{@link StringRedisTemplate} 完成外观接口行为
- *
- * @公众号：马丁玩编程，回复：加群，添加马哥微信（备注：12306）获取项目资料
  */
 @RequiredArgsConstructor
 public class StringRedisTemplateProxy implements DistributedCache {
@@ -81,7 +78,7 @@ public class StringRedisTemplateProxy implements DistributedCache {
             return redisScript;
         });
         Boolean result = stringRedisTemplate.execute(actual, Lists.newArrayList(keys), redisProperties.getValueTimeout().toString());
-        return result == null ? false : result;
+        return result != null && result;
     }
 
     @Override
@@ -105,7 +102,7 @@ public class StringRedisTemplateProxy implements DistributedCache {
         if (!CacheUtil.isNullOrBlank(result)) {
             return result;
         }
-        return loadAndSet(key, cacheLoader, timeout, redisProperties.getValueTimeUnit(), false, null);
+        return loadAndSet(key, cacheLoader, timeout, timeUnit, false, null);
     }
 
     @Override
@@ -189,7 +186,9 @@ public class StringRedisTemplateProxy implements DistributedCache {
     @Override
     public void safePut(String key, Object value, long timeout, TimeUnit timeUnit, RBloomFilter<String> bloomFilter) {
         put(key, value, timeout, timeUnit);
-        bloomFilter.add(key);
+        if (bloomFilter != null) {
+            bloomFilter.add(key);
+        }
     }
 
     @Override
