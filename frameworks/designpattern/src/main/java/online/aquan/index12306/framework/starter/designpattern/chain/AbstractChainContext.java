@@ -48,19 +48,26 @@ public final class AbstractChainContext<T> implements CommandLineRunner {
         abstractChainHandlers.forEach(each -> each.handler(requestParam));
     }
 
+    /**
+     * 这个run方法是springboot运行之后立刻执行的,args就是启动参数
+     */
     @Override
     public void run(String... args) throws Exception {
+        //获取所有的责任链上的基础bean
         Map<String, AbstractChainHandler> chainFilterMap = ApplicationContextHolder
                 .getBeansOfType(AbstractChainHandler.class);
         chainFilterMap.forEach((beanName, bean) -> {
+            //将相同的mark值的bean组成链表
             List<AbstractChainHandler> abstractChainHandlers = abstractChainHandlerContainer.get(bean.mark());
             if (CollectionUtils.isEmpty(abstractChainHandlers)) {
                 abstractChainHandlers = new ArrayList();
             }
             abstractChainHandlers.add(bean);
+            //对每一个链表都内部排序,每一个链表会执行多次
             List<AbstractChainHandler> actualAbstractChainHandlers = abstractChainHandlers.stream()
                     .sorted(Comparator.comparing(Ordered::getOrder))
                     .collect(Collectors.toList());
+            //放入全局的责任链map中
             abstractChainHandlerContainer.put(bean.mark(), actualAbstractChainHandlers);
         });
     }

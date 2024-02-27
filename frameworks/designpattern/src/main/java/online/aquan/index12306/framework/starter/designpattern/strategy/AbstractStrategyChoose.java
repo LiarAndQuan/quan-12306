@@ -34,7 +34,7 @@ import java.util.Optional;
 public class AbstractStrategyChoose implements ApplicationListener<ApplicationInitializingEvent> {
 
     /**
-     * 执行策略集合
+     * 执行策略集合,一个mark对应一个策略
      */
     private final Map<String, AbstractExecuteStrategy> abstractExecuteStrategyMap = new HashMap<>();
 
@@ -76,12 +76,15 @@ public class AbstractStrategyChoose implements ApplicationListener<ApplicationIn
 
     @Override
     public void onApplicationEvent(ApplicationInitializingEvent event) {
+        //获取所有的策略
         Map<String, AbstractExecuteStrategy> actual = ApplicationContextHolder.getBeansOfType(AbstractExecuteStrategy.class);
         actual.forEach((beanName, bean) -> {
+            //如果之前就存在这个mark,说明策略重复了
             AbstractExecuteStrategy beanExist = abstractExecuteStrategyMap.get(bean.mark());
             if (beanExist != null) {
                 throw new ServiceException(String.format("[%s] Duplicate execution policy", bean.mark()));
             }
+            //添加入全局策略map
             abstractExecuteStrategyMap.put(bean.mark(), bean);
         });
     }

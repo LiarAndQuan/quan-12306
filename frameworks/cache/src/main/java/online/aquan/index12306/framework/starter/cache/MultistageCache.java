@@ -15,15 +15,12 @@
  * limitations under the License.
  */
 
-package online.aquan.index12306.biz.messageservice;
+package online.aquan.index12306.framework.starter.cache;
 
-import org.springframework.boot.SpringApplication;
-import org.springframework.boot.autoconfigure.SpringBootApplication;
-
-@SpringBootApplication
-public class MessageServiceApplication {
-
-    public static void main(String[] args) {
-        SpringApplication.run(MessageServiceApplication.class, args);
-    }
+/**
+ * 多级缓存
+ *
+ * @公众号：马丁玩编程，回复：加群，添加马哥微信（备注：12306）获取项目资料
+ */
+public interface MultistageCache extends Cache {
 }
