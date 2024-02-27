@@ -20,17 +20,17 @@ package online.aquan.index12306.framework.starter.convention.result;
 import lombok.Data;
 import lombok.experimental.Accessors;
 
+import java.io.Serial;
 import java.io.Serializable;
 
 /**
  * 全局返回对象
- *
- * @公众号：马丁玩编程，回复：加群，添加马哥微信（备注：12306）获取项目资料
  */
 @Data
 @Accessors(chain = true)
 public class Result<T> implements Serializable {
 
+    @Serial
     private static final long serialVersionUID = 5679018624309023727L;
 
     /**
