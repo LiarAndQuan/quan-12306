@@ -1,5 +1,6 @@
 package online.aquan.index12306.biz.userservice.service;
 
+import online.aquan.index12306.biz.userservice.dto.req.PassengerReqDTO;
 import online.aquan.index12306.biz.userservice.dto.resp.PassengerActualRespDTO;
 import online.aquan.index12306.biz.userservice.dto.resp.PassengerRespDTO;
 
@@ -23,4 +24,11 @@ public interface PassengerService {
      */
     List<PassengerActualRespDTO> listPassengerQueryByIds(String username, List<Long> ids);
 
+
+    /**
+     * 新增乘车人
+     *
+     * @param requestParam 乘车人信息
+     */
+    void savePassenger(PassengerReqDTO requestParam);
 }
