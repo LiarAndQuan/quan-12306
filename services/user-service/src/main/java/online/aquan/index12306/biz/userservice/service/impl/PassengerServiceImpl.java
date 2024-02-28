@@ -1,12 +1,14 @@
 package online.aquan.index12306.biz.userservice.service.impl;
 
 import cn.hutool.core.collection.CollUtil;
+import cn.hutool.core.util.StrUtil;
 import com.alibaba.fastjson2.JSON;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import lombok.RequiredArgsConstructor;
 import online.aquan.index12306.biz.userservice.dao.entity.PassengerDO;
 import online.aquan.index12306.biz.userservice.dao.mapper.PassengerMapper;
+import online.aquan.index12306.biz.userservice.dto.resp.PassengerActualRespDTO;
 import online.aquan.index12306.biz.userservice.dto.resp.PassengerRespDTO;
 import online.aquan.index12306.biz.userservice.service.PassengerService;
 import online.aquan.index12306.framework.starter.cache.DistributedCache;
@@ -16,6 +18,7 @@ import org.springframework.stereotype.Service;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 
 import static online.aquan.index12306.biz.userservice.common.constant.RedisKeyConstant.USER_PASSENGER_LIST;
 
@@ -48,5 +51,17 @@ public class PassengerServiceImpl implements PassengerService {
                 1,
                 TimeUnit.DAYS
         );
+    }
+
+    @Override
+    public List<PassengerActualRespDTO> listPassengerQueryByIds(String username, List<Long> ids) {
+        String actualUserPassengerListStr = getActualUserPassengerListStr(username);
+        if (StrUtil.isEmpty(actualUserPassengerListStr)) {
+            return null;
+        }
+        return JSON.parseArray(actualUserPassengerListStr, PassengerDO.class)
+                .stream().filter(passengerDO -> ids.contains(passengerDO.getId()))
+                .map(each -> BeanUtil.convert(each, PassengerActualRespDTO.class))
+                .collect(Collectors.toList());
     }
 }
