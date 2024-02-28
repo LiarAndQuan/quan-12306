@@ -1,6 +1,7 @@
 package online.aquan.index12306.biz.userservice.service;
 
 import jakarta.validation.constraints.NotEmpty;
+import online.aquan.index12306.biz.userservice.dto.req.UserUpdateReqDTO;
 import online.aquan.index12306.biz.userservice.dto.resp.UserQueryActualRespDTO;
 import online.aquan.index12306.biz.userservice.dto.resp.UserQueryRespDTO;
 
@@ -30,4 +31,11 @@ public interface UserService {
      * @return 注销次数
      */
     Integer queryUserDeletionNum(Integer idType, String idCard);
+
+    /**
+     * 根据用户 ID 修改用户信息
+     *
+     * @param requestParam 用户信息入参
+     */
+    void update(UserUpdateReqDTO requestParam);
 }
