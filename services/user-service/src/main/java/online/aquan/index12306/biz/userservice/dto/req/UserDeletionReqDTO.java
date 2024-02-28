@@ -15,21 +15,19 @@
  * limitations under the License.
  */
 
-package online.aquan.index12306.biz.userservice.dao.mapper;
+package online.aquan.index12306.biz.userservice.dto.req;
 
-
-import com.baomidou.mybatisplus.core.mapper.BaseMapper;
-import online.aquan.index12306.biz.userservice.dao.entity.UserMailDO;
+import lombok.Data;
 
 /**
- * 用户邮箱表持久层
+ * 用户注销请求参数
  *
  */
-public interface UserMailMapper extends BaseMapper<UserMailDO> {
+@Data
+public class UserDeletionReqDTO {
+
     /**
-     * 注销用户
-     *
-     * @param userMailDO 注销用户入参
+     * 用户名
      */
-    void deletionUser(UserMailDO userMailDO);
+    private String username;
 }

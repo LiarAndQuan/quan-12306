@@ -8,24 +8,22 @@ import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import online.aquan.index12306.biz.userservice.common.enums.UserChainMarkEnum;
-import online.aquan.index12306.biz.userservice.dao.entity.UserDO;
-import online.aquan.index12306.biz.userservice.dao.entity.UserMailDO;
-import online.aquan.index12306.biz.userservice.dao.entity.UserPhoneDO;
-import online.aquan.index12306.biz.userservice.dao.entity.UserReuseDO;
-import online.aquan.index12306.biz.userservice.dao.mapper.UserMailMapper;
-import online.aquan.index12306.biz.userservice.dao.mapper.UserMapper;
-import online.aquan.index12306.biz.userservice.dao.mapper.UserPhoneMapper;
-import online.aquan.index12306.biz.userservice.dao.mapper.UserReuseMapper;
+import online.aquan.index12306.biz.userservice.dao.entity.*;
+import online.aquan.index12306.biz.userservice.dao.mapper.*;
+import online.aquan.index12306.biz.userservice.dto.req.UserDeletionReqDTO;
 import online.aquan.index12306.biz.userservice.dto.req.UserLoginReqDTO;
 import online.aquan.index12306.biz.userservice.dto.req.UserRegisterReqDTO;
 import online.aquan.index12306.biz.userservice.dto.resp.UserLoginRespDTO;
+import online.aquan.index12306.biz.userservice.dto.resp.UserQueryRespDTO;
 import online.aquan.index12306.biz.userservice.dto.resp.UserRegisterRespDTO;
 import online.aquan.index12306.biz.userservice.service.UserLoginService;
+import online.aquan.index12306.biz.userservice.service.UserService;
 import online.aquan.index12306.framework.starter.cache.DistributedCache;
 import online.aquan.index12306.framework.starter.common.toolkit.BeanUtil;
 import online.aquan.index12306.framework.starter.convention.exception.ClientException;
 import online.aquan.index12306.framework.starter.convention.exception.ServiceException;
 import online.aquan.index12306.framework.starter.designpattern.chain.AbstractChainContext;
+import online.aquan.index12306.frameworks.starter.user.core.UserContext;
 import online.aquan.index12306.frameworks.starter.user.core.UserInfoDTO;
 import online.aquan.index12306.frameworks.starter.user.toolkit.JWTUtil;
 import org.redisson.api.RBloomFilter;
@@ -36,11 +34,11 @@ import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 
-import static online.aquan.index12306.biz.userservice.common.constant.RedisKeyConstant.LOCK_USER_REGISTER;
-import static online.aquan.index12306.biz.userservice.common.constant.RedisKeyConstant.USER_REGISTER_REUSE_SHARDING;
+import static online.aquan.index12306.biz.userservice.common.constant.RedisKeyConstant.*;
 import static online.aquan.index12306.biz.userservice.common.enums.UserRegisterErrorCodeEnum.*;
 import static online.aquan.index12306.biz.userservice.toolkit.UserReuseUtil.hashShardingIdx;
 
@@ -57,6 +55,8 @@ public class UserLoginServiceImpl extends ServiceImpl<UserMapper, UserDO> implem
     private final RedissonClient redissonClient;
     private final AbstractChainContext<UserRegisterReqDTO> abstractChainContext;
     private final UserReuseMapper userReuseMapper;
+    private final UserService userService;
+    private final UserDeletionMapper userDeletionMapper;
     
     
     
@@ -193,5 +193,57 @@ public class UserLoginServiceImpl extends ServiceImpl<UserMapper, UserDO> implem
             lock.unlock();
         }
         return BeanUtil.convert(requestParam, UserRegisterRespDTO.class);
+    }
+
+    @Transactional(rollbackFor = Exception.class)
+    @Override
+    public void deletion(UserDeletionReqDTO requestParam) {
+        String username = UserContext.getUsername();
+        if (!Objects.equals(username, requestParam.getUsername())) {
+            // 此处严谨来说，需要上报风控中心进行异常检测
+            throw new ClientException("注销账号与登录账号不一致");
+        }
+        //lock.lock如果没有获取到锁会阻塞请求,trylock则会抛出异常
+        RLock lock = redissonClient.getLock(USER_DELETION + requestParam.getUsername());
+        // 加锁为什么放在 try 语句外?
+        lock.lock();
+        try {
+            UserQueryRespDTO userQueryRespDTO = userService.queryUserByUsername(username);
+            //将注销的证件号记录下来
+            UserDeletionDO userDeletionDO = UserDeletionDO.builder()
+                    .idType(userQueryRespDTO.getIdType())
+                    .idCard(userQueryRespDTO.getIdCard())
+                    .build();
+            userDeletionMapper.insert(userDeletionDO);
+            //将user表里面的记录进行逻辑删除,设定删除时间
+            UserDO userDO = new UserDO();
+            userDO.setDeletionTime(System.currentTimeMillis());
+            userDO.setUsername(username);
+            // MyBatis Plus 不支持修改语句变更 del_flag 字段
+            userMapper.deletionUser(userDO);
+            //删除phone的路由记录
+            UserPhoneDO userPhoneDO = UserPhoneDO.builder()
+                    .phone(userQueryRespDTO.getPhone())
+                    .deletionTime(System.currentTimeMillis())
+                    .build();
+            userPhoneMapper.deletionUser(userPhoneDO);
+            //删除mail的路由记录
+            if (StrUtil.isNotBlank(userQueryRespDTO.getMail())) {
+                UserMailDO userMailDO = UserMailDO.builder()
+                        .mail(userQueryRespDTO.getMail())
+                        .deletionTime(System.currentTimeMillis())
+                        .build();
+                userMailMapper.deletionUser(userMailDO);
+            }
+            //删除用户登录的token
+            distributedCache.delete(UserContext.getToken());
+            //将删除的用户名插入user_reuse表中表示可以再使用
+            userReuseMapper.insert(new UserReuseDO(username));
+            //将这个username放入redis的set结构中表示这个username可以再次使用
+            StringRedisTemplate instance = (StringRedisTemplate) distributedCache.getInstance();
+            instance.opsForSet().add(USER_REGISTER_REUSE_SHARDING + hashShardingIdx(username), username);
+        } finally {
+            lock.unlock();
+        }
     }
 }

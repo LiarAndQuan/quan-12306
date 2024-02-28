@@ -2,6 +2,7 @@ package online.aquan.index12306.biz.userservice.service;
 
 import com.baomidou.mybatisplus.extension.service.IService;
 import online.aquan.index12306.biz.userservice.dao.entity.UserDO;
+import online.aquan.index12306.biz.userservice.dto.req.UserDeletionReqDTO;
 import online.aquan.index12306.biz.userservice.dto.req.UserLoginReqDTO;
 import online.aquan.index12306.biz.userservice.dto.req.UserRegisterReqDTO;
 import online.aquan.index12306.biz.userservice.dto.resp.UserLoginRespDTO;
@@ -48,4 +49,11 @@ public interface UserLoginService extends IService<UserDO> {
      * @return 用户注册返回结果
      */
     UserRegisterRespDTO register(UserRegisterReqDTO requestParam);
+
+    /**
+     * 注销用户
+     *
+     * @param requestParam 注销用户入参
+     */
+    void deletion(UserDeletionReqDTO requestParam);
 }

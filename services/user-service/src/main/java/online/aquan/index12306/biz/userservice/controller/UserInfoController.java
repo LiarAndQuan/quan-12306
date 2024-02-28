@@ -4,6 +4,7 @@ package online.aquan.index12306.biz.userservice.controller;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotEmpty;
 import lombok.RequiredArgsConstructor;
+import online.aquan.index12306.biz.userservice.dto.req.UserDeletionReqDTO;
 import online.aquan.index12306.biz.userservice.dto.req.UserRegisterReqDTO;
 import online.aquan.index12306.biz.userservice.dto.req.UserUpdateReqDTO;
 import online.aquan.index12306.biz.userservice.dto.resp.UserQueryActualRespDTO;
@@ -62,5 +63,15 @@ public class UserInfoController {
         userService.update(requestParam);
         return Results.success();
     }
+
+    /**
+     * 注销用户
+     */
+    @PostMapping("/api/user-service/deletion")
+    public Result<Void> deletion(@RequestBody @Valid UserDeletionReqDTO requestParam) {
+        userLoginService.deletion(requestParam);
+        return Results.success();
+    }
+    
     
 }
