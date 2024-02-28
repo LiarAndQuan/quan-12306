@@ -31,4 +31,11 @@ public interface PassengerService {
      * @param requestParam 乘车人信息
      */
     void savePassenger(PassengerReqDTO requestParam);
+
+    /**
+     * 修改乘车人
+     *
+     * @param requestParam 乘车人信息
+     */
+    void updatePassenger(PassengerReqDTO requestParam);
 }

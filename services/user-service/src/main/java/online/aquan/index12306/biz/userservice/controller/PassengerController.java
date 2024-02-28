@@ -53,4 +53,20 @@ public class PassengerController {
         passengerService.savePassenger(requestParam);
         return Results.success();
     }
+
+    /**
+     * 修改乘车人
+     */
+    @Idempotent(
+            uniqueKeyPrefix = "index12306-user:lock_passenger-alter:",
+            key = "T(online.aquan.index12306.frameworks.starter.user.core.UserContext).getUsername()",
+            type = IdempotentTypeEnum.SPEL,
+            scene = IdempotentSceneEnum.RESTAPI,
+            message = "正在修改乘车人，请稍后再试..."
+    )
+    @PostMapping("/api/user-service/passenger/update")
+    public Result<Void> updatePassenger(@RequestBody PassengerReqDTO requestParam) {
+        passengerService.updatePassenger(requestParam);
+        return Results.success();
+    }
 }
