@@ -7,4 +7,9 @@ public class RedisKeyConstant {
      */
     public static final String USER_REGISTER_REUSE_SHARDING = "index12306-user-service:user-reuse:";
 
+    /**
+     * 用户注册锁，Key Prefix + 用户名
+     */
+    public static final String LOCK_USER_REGISTER = "index12306-user-service:lock:user-register:";
+
 }

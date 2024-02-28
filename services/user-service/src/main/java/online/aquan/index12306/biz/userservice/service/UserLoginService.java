@@ -3,7 +3,9 @@ package online.aquan.index12306.biz.userservice.service;
 import com.baomidou.mybatisplus.extension.service.IService;
 import online.aquan.index12306.biz.userservice.dao.entity.UserDO;
 import online.aquan.index12306.biz.userservice.dto.req.UserLoginReqDTO;
+import online.aquan.index12306.biz.userservice.dto.req.UserRegisterReqDTO;
 import online.aquan.index12306.biz.userservice.dto.resp.UserLoginRespDTO;
+import online.aquan.index12306.biz.userservice.dto.resp.UserRegisterRespDTO;
 
 public interface UserLoginService extends IService<UserDO> {
 
@@ -38,4 +40,12 @@ public interface UserLoginService extends IService<UserDO> {
      * @return 用户名是否存在返回结果
      */
     Boolean hasUsername(String username);
+
+    /**
+     * 用户注册
+     *
+     * @param requestParam 用户注册入参
+     * @return 用户注册返回结果
+     */
+    UserRegisterRespDTO register(UserRegisterReqDTO requestParam);
 }

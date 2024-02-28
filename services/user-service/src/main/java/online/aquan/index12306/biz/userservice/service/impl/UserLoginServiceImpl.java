@@ -6,32 +6,47 @@ import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import online.aquan.index12306.biz.userservice.common.enums.UserChainMarkEnum;
 import online.aquan.index12306.biz.userservice.dao.entity.UserDO;
 import online.aquan.index12306.biz.userservice.dao.entity.UserMailDO;
 import online.aquan.index12306.biz.userservice.dao.entity.UserPhoneDO;
+import online.aquan.index12306.biz.userservice.dao.entity.UserReuseDO;
 import online.aquan.index12306.biz.userservice.dao.mapper.UserMailMapper;
 import online.aquan.index12306.biz.userservice.dao.mapper.UserMapper;
 import online.aquan.index12306.biz.userservice.dao.mapper.UserPhoneMapper;
+import online.aquan.index12306.biz.userservice.dao.mapper.UserReuseMapper;
 import online.aquan.index12306.biz.userservice.dto.req.UserLoginReqDTO;
+import online.aquan.index12306.biz.userservice.dto.req.UserRegisterReqDTO;
 import online.aquan.index12306.biz.userservice.dto.resp.UserLoginRespDTO;
+import online.aquan.index12306.biz.userservice.dto.resp.UserRegisterRespDTO;
 import online.aquan.index12306.biz.userservice.service.UserLoginService;
 import online.aquan.index12306.framework.starter.cache.DistributedCache;
+import online.aquan.index12306.framework.starter.common.toolkit.BeanUtil;
 import online.aquan.index12306.framework.starter.convention.exception.ClientException;
 import online.aquan.index12306.framework.starter.convention.exception.ServiceException;
+import online.aquan.index12306.framework.starter.designpattern.chain.AbstractChainContext;
 import online.aquan.index12306.frameworks.starter.user.core.UserInfoDTO;
 import online.aquan.index12306.frameworks.starter.user.toolkit.JWTUtil;
 import org.redisson.api.RBloomFilter;
+import org.redisson.api.RLock;
+import org.redisson.api.RedissonClient;
+import org.springframework.dao.DuplicateKeyException;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 
+import static online.aquan.index12306.biz.userservice.common.constant.RedisKeyConstant.LOCK_USER_REGISTER;
 import static online.aquan.index12306.biz.userservice.common.constant.RedisKeyConstant.USER_REGISTER_REUSE_SHARDING;
+import static online.aquan.index12306.biz.userservice.common.enums.UserRegisterErrorCodeEnum.*;
 import static online.aquan.index12306.biz.userservice.toolkit.UserReuseUtil.hashShardingIdx;
 
 @RequiredArgsConstructor
 @Service
+@Slf4j
 public class UserLoginServiceImpl extends ServiceImpl<UserMapper, UserDO> implements UserLoginService {
     
     private final UserMailMapper userMailMapper;
@@ -39,6 +54,10 @@ public class UserLoginServiceImpl extends ServiceImpl<UserMapper, UserDO> implem
     private final UserMapper userMapper;
     private final DistributedCache distributedCache;
     private final RBloomFilter<String> userRegisterCachePenetrationBloomFilter;
+    private final RedissonClient redissonClient;
+    private final AbstractChainContext<UserRegisterReqDTO> abstractChainContext;
+    private final UserReuseMapper userReuseMapper;
+    
     
     
     @Override
@@ -113,5 +132,66 @@ public class UserLoginServiceImpl extends ServiceImpl<UserMapper, UserDO> implem
             return instance.opsForSet().isMember(USER_REGISTER_REUSE_SHARDING + hashShardingIdx(username), username);
         }
         return true;
+    }
+
+    @Transactional(rollbackFor = Exception.class)
+    @Override
+    public UserRegisterRespDTO register(UserRegisterReqDTO requestParam) {
+        //通过责任链模式验证传入的参数是否合法
+        abstractChainContext.handler(UserChainMarkEnum.USER_REGISTER_FILTER.name(), requestParam);
+        //创建分布式锁
+        RLock lock = redissonClient.getLock(LOCK_USER_REGISTER + requestParam.getUsername());
+        //尝试获取这个锁
+        boolean tryLock = lock.tryLock();
+        //如果没有获取到,说明有别的请求在使用相同的名字进行注册
+        if (!tryLock) {
+            throw new ServiceException(HAS_USERNAME_NOTNULL);
+        }
+        try {
+            try {
+                //加入到用户表中
+                int inserted = userMapper.insert(BeanUtil.convert(requestParam, UserDO.class));
+                if (inserted < 1) {
+                    throw new ServiceException(USER_REGISTER_FAIL);
+                }
+            } catch (DuplicateKeyException dke) {
+                log.error("用户名 [{}] 重复注册", requestParam.getUsername());
+                throw new ServiceException(HAS_USERNAME_NOTNULL);
+            }
+            //建立phone和username的路由记录
+            UserPhoneDO userPhoneDO = UserPhoneDO.builder()
+                    .phone(requestParam.getPhone())
+                    .username(requestParam.getUsername())
+                    .build();
+            try {
+                userPhoneMapper.insert(userPhoneDO);
+            } catch (DuplicateKeyException dke) {
+                log.error("用户 [{}] 注册手机号 [{}] 重复", requestParam.getUsername(), requestParam.getPhone());
+                throw new ServiceException(PHONE_REGISTERED);
+            }
+            //建立mail和username的对应关系
+            if (StrUtil.isNotBlank(requestParam.getMail())) {
+                UserMailDO userMailDO = UserMailDO.builder()
+                        .mail(requestParam.getMail())
+                        .username(requestParam.getUsername())
+                        .build();
+                try {
+                    userMailMapper.insert(userMailDO);
+                } catch (DuplicateKeyException dke) {
+                    log.error("用户 [{}] 注册邮箱 [{}] 重复", requestParam.getUsername(), requestParam.getMail());
+                    throw new ServiceException(MAIL_REGISTERED);
+                }
+            }
+            //删除用户名复用表中的对应名字
+            String username = requestParam.getUsername();
+            userReuseMapper.delete(Wrappers.update(new UserReuseDO(username)));
+            //删除redis的set中的这个名字(如果set中有这个名字说明可以使用这个名字,没有这个名字说明不可用)
+            StringRedisTemplate instance = (StringRedisTemplate) distributedCache.getInstance();
+            instance.opsForSet().remove(USER_REGISTER_REUSE_SHARDING + hashShardingIdx(username), username);
+            userRegisterCachePenetrationBloomFilter.add(username);
+        } finally {
+            lock.unlock();
+        }
+        return BeanUtil.convert(requestParam, UserRegisterRespDTO.class);
     }
 }
