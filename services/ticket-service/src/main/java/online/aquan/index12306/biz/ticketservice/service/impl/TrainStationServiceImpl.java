@@ -5,12 +5,15 @@ import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import lombok.RequiredArgsConstructor;
 import online.aquan.index12306.biz.ticketservice.dao.entity.TrainStationDO;
 import online.aquan.index12306.biz.ticketservice.dao.mapper.TrainStationMapper;
+import online.aquan.index12306.biz.ticketservice.dto.domain.RouteDTO;
 import online.aquan.index12306.biz.ticketservice.dto.resp.TrainStationQueryRespDTO;
 import online.aquan.index12306.biz.ticketservice.service.TrainStationService;
+import online.aquan.index12306.biz.ticketservice.toolkit.StationCalculateUtil;
 import online.aquan.index12306.framework.starter.common.toolkit.BeanUtil;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 
 @Service
@@ -25,5 +28,16 @@ public class TrainStationServiceImpl implements TrainStationService {
                 .eq(TrainStationDO::getTrainId, trainId);
         List<TrainStationDO> trainStationDOList = trainStationMapper.selectList(queryWrapper);
         return BeanUtil.convert(trainStationDOList, TrainStationQueryRespDTO.class);
+    }
+
+    @Override
+    public List<RouteDTO> listTrainStationRoute(String trainId, String departure, String arrival) {
+        LambdaQueryWrapper<TrainStationDO> queryWrapper = Wrappers.lambdaQuery(TrainStationDO.class)
+                .eq(TrainStationDO::getTrainId, trainId)
+                .select(TrainStationDO::getDeparture);
+        //获取这辆列车所有的站点
+        List<TrainStationDO> trainStationDOList = trainStationMapper.selectList(queryWrapper);
+        List<String> trainStationAllList = trainStationDOList.stream().map(TrainStationDO::getDeparture).collect(Collectors.toList());
+        return StationCalculateUtil.throughStation(trainStationAllList, departure, arrival);
     }
 }
