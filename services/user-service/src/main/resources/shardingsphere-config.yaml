@@ -1,4 +1,3 @@
-
 dataSources:
   ds_0:
     dataSourceClassName: com.zaxxer.hikari.HikariDataSource
@@ -15,12 +14,71 @@ rules:
         tableStrategy:
           standard:
             shardingColumn: username
-            shardingAlgorithmName: user_hash_mod
+            shardingAlgorithmName: user_table_hash_mod
+      t_passenger:
+        actualDataNodes: ds_0.t_passenger_${0..15}
+        tableStrategy:
+          standard:
+            shardingColumn: username
+            shardingAlgorithmName: passenger_table_hash_mod
+      t_user_mail:
+        actualDataNodes: ds_0.t_user_mail_${0..15}
+        tableStrategy:
+          standard:
+            shardingColumn: mail
+            shardingAlgorithmName: t_user_mail_table_hash_mod
+      t_user_phone:
+        actualDataNodes: ds_0.t_user_phone_${0..15}
+        tableStrategy:
+          standard:
+            shardingColumn: phone
+            shardingAlgorithmName: t_user_phone_table_hash_mod
     shardingAlgorithms:
-      user_hash_mod:
+      passenger_table_hash_mod:
         type: HASH_MOD
         props:
           sharding-count: 16
-
+      t_user_mail_table_hash_mod:
+        type: HASH_MOD
+        props:
+          sharding-count: 16
+      t_user_phone_table_hash_mod:
+        type: HASH_MOD
+        props:
+          sharding-count: 16
+      user_table_hash_mod:
+        type: HASH_MOD
+        props:
+          sharding-count: 16
+  - !ENCRYPT
+    tables:
+      t_user:
+        columns:
+          id_card:
+            cipherColumn: id_card
+            encryptorName: common_encryptor
+          phone:
+            cipherColumn: phone
+            encryptorName: common_encryptor
+          mail:
+            cipherColumn: mail
+            encryptorName: common_encryptor
+          address:
+            cipherColumn: address
+            encryptorName: common_encryptor
+      t_passenger:
+        columns:
+          id_card:
+            cipherColumn: id_card
+            encryptorName: common_encryptor
+          phone:
+            cipherColumn: phone
+            encryptorName: common_encryptor
+        queryWithCipherColumn: true
+    encryptors:
+      common_encryptor:
+        type: AES
+        props:
+          aes-key-value: d6oadClrrb9A3GWo
 props:
   sql-show: true
