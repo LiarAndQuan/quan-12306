@@ -44,7 +44,7 @@ public class RegionStationServiceImpl implements RegionStationService {
     @Override
     public List<RegionStationQueryRespDTO> listRegionStation(RegionStationQueryReqDTO requestParam) {
         String key;
-        //如果传入了名字,那么直接根据名字查询即可
+        //如果传入了车站名,那么直接根据名字查询对应的站点即可
         if (StrUtil.isNotBlank(requestParam.getName())) {
             key  = REGION_STATION  + requestParam.getName();
             return safeGetRegionStation(
@@ -61,10 +61,10 @@ public class RegionStationServiceImpl implements RegionStationService {
                     requestParam.getName()
             );
         }
-        //没有传入名字,那么说明没有确切的查询,那么就看前端传入的type字段,并且更新key值
+        //没有传入车站名,那么就看前端传入的type字段来查询地区,并且更新key值
         key  = REGION_STATION  + requestParam.getQueryType();
         LambdaQueryWrapper<RegionDO> queryWrapper = switch (requestParam.getQueryType()) {
-            //如果为0,那么查询热门站点,否则根据映射关系查询对应首字母的站点并返回
+            //如果为0,那么查询热门地区,否则根据映射关系查询对应首字母的站点并返回
             case 0 -> Wrappers.lambdaQuery(RegionDO.class)
                     .eq(RegionDO::getPopularFlag, FlagEnum.TRUE.code());
             case 1 -> Wrappers.lambdaQuery(RegionDO.class)

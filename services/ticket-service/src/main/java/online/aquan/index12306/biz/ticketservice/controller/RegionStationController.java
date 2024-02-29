@@ -18,7 +18,7 @@ public class RegionStationController {
     private final RegionStationService regionStationService;
 
     /**
-     * 查询车站&城市站点集合信息
+     * 根据车站名查询车站或者传入的type(首字母范围)查询城市站点集合信息
      */
     @GetMapping("/api/ticket-service/region-station/query")
     public Result<List<RegionStationQueryRespDTO>> listRegionStation(RegionStationQueryReqDTO requestParam) {
