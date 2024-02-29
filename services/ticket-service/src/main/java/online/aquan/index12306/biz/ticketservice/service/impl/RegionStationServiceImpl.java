@@ -13,6 +13,7 @@ import online.aquan.index12306.biz.ticketservice.dao.mapper.RegionMapper;
 import online.aquan.index12306.biz.ticketservice.dao.mapper.StationMapper;
 import online.aquan.index12306.biz.ticketservice.dto.req.RegionStationQueryReqDTO;
 import online.aquan.index12306.biz.ticketservice.dto.resp.RegionStationQueryRespDTO;
+import online.aquan.index12306.biz.ticketservice.dto.resp.StationQueryRespDTO;
 import online.aquan.index12306.biz.ticketservice.service.RegionStationService;
 import online.aquan.index12306.framework.starter.cache.DistributedCache;
 import online.aquan.index12306.framework.starter.cache.core.CacheLoader;
@@ -29,8 +30,7 @@ import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 import static online.aquan.index12306.biz.ticketservice.common.constant.Index12306Constant.ADVANCE_TICKET_DAY;
-import static online.aquan.index12306.biz.ticketservice.common.constant.RedisKeyConstant.LOCK_QUERY_REGION_STATION_LIST;
-import static online.aquan.index12306.biz.ticketservice.common.constant.RedisKeyConstant.REGION_STATION;
+import static online.aquan.index12306.biz.ticketservice.common.constant.RedisKeyConstant.*;
 
 @Service
 @RequiredArgsConstructor
@@ -128,5 +128,16 @@ public class RegionStationServiceImpl implements RegionStationService {
                 TimeUnit.DAYS
         );
         return respDTOList;
+    }
+
+    @Override
+    public List<StationQueryRespDTO> listAllStation() {
+        return distributedCache.safeGet(
+                STATION_ALL,
+                List.class,
+                () -> BeanUtil.convert(stationMapper.selectList(Wrappers.emptyWrapper()), StationQueryRespDTO.class),
+                ADVANCE_TICKET_DAY,
+                TimeUnit.DAYS
+        );
     }
 }

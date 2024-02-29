@@ -12,4 +12,9 @@ public class RedisKeyConstant {
      */
     public static final String LOCK_QUERY_REGION_STATION_LIST = "index12306-ticket-service:lock:query_region_station_list_%s";
 
+    /**
+     * 列车站点缓存
+     */
+    public static final String STATION_ALL = "index12306-ticket-service:all_station";
+
 }

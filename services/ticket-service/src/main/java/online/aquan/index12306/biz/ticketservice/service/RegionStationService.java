@@ -2,6 +2,7 @@ package online.aquan.index12306.biz.ticketservice.service;
 
 import online.aquan.index12306.biz.ticketservice.dto.req.RegionStationQueryReqDTO;
 import online.aquan.index12306.biz.ticketservice.dto.resp.RegionStationQueryRespDTO;
+import online.aquan.index12306.biz.ticketservice.dto.resp.StationQueryRespDTO;
 
 import java.util.List;
 
@@ -15,4 +16,11 @@ public interface RegionStationService {
      */
     List<RegionStationQueryRespDTO> listRegionStation(RegionStationQueryReqDTO requestParam);
 
+
+    /**
+     * 查询所有车站&城市站点集合信息
+     *
+     * @return 车站返回数据集合
+     */
+    List<StationQueryRespDTO> listAllStation();
 }

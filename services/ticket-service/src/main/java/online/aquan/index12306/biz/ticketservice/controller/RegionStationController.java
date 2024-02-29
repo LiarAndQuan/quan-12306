@@ -3,6 +3,7 @@ package online.aquan.index12306.biz.ticketservice.controller;
 import lombok.RequiredArgsConstructor;
 import online.aquan.index12306.biz.ticketservice.dto.req.RegionStationQueryReqDTO;
 import online.aquan.index12306.biz.ticketservice.dto.resp.RegionStationQueryRespDTO;
+import online.aquan.index12306.biz.ticketservice.dto.resp.StationQueryRespDTO;
 import online.aquan.index12306.biz.ticketservice.service.RegionStationService;
 import online.aquan.index12306.framework.starter.convention.result.Result;
 import online.aquan.index12306.framework.starter.web.Results;
@@ -23,5 +24,13 @@ public class RegionStationController {
     @GetMapping("/api/ticket-service/region-station/query")
     public Result<List<RegionStationQueryRespDTO>> listRegionStation(RegionStationQueryReqDTO requestParam) {
         return Results.success(regionStationService.listRegionStation(requestParam));
+    }
+
+    /**
+     * 查询所有车站站点集合信息
+     */
+    @GetMapping("/api/ticket-service/station/all")
+    public Result<List<StationQueryRespDTO>> listAllStation() {
+        return Results.success(regionStationService.listAllStation());
     }
 }
