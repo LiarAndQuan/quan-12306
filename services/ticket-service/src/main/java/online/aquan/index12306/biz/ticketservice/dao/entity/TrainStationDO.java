@@ -17,6 +17,8 @@
 
 package online.aquan.index12306.biz.ticketservice.dao.entity;
 
+import com.baomidou.mybatisplus.annotation.IdType;
+import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
 import lombok.Data;
 import online.aquan.index12306.framework.starter.database.base.BaseDO;
@@ -25,6 +27,7 @@ import java.util.Date;
 
 /**
  * 列车站点实体
+ *
  */
 @Data
 @TableName("t_train_station")
@@ -33,6 +36,7 @@ public class TrainStationDO extends BaseDO {
     /**
      * id
      */
+    @TableId(type = IdType.AUTO)
     private Long id;
 
     /**
@@ -41,9 +45,14 @@ public class TrainStationDO extends BaseDO {
     private Long trainId;
 
     /**
+     * 车站id
+     */
+    private Long stationId;
+
+    /**
      * 站点顺序
      */
-    private Integer sequence;
+    private String sequence;
 
     /**
      * 出发站点
