@@ -15,18 +15,43 @@
  * limitations under the License.
  */
 
-package online.aquan.index12306.biz.orderservice;
+package online.aquan.index12306.biz.orderservice.dao.entity;
 
-import org.mybatis.spring.annotation.MapperScan;
-import org.springframework.boot.SpringApplication;
-import org.springframework.boot.autoconfigure.SpringBootApplication;
+import com.baomidou.mybatisplus.annotation.TableName;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+import online.aquan.index12306.framework.starter.database.base.BaseDO;
 
-@SpringBootApplication
-@MapperScan("online.aquan.index12306.biz.orderservice.dao.mapper")
-public class OrderServiceApplication {
+/**
+ * 乘车人订单关系实体
+ *
+ */
+@Data
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
+@TableName("t_order_item_passenger")
+public class OrderItemPassengerDO extends BaseDO {
 
-    public static void main(String[] args) {
-        SpringApplication.run(OrderServiceApplication.class, args);
-    }
+    /**
+     * id
+     */
+    private Long id;
 
+    /**
+     * 订单号
+     */
+    private String orderSn;
+
+    /**
+     * 证件类型
+     */
+    private Integer idType;
+
+    /**
+     * 证件号
+     */
+    private String idCard;
 }
