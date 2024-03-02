@@ -15,24 +15,42 @@
  * limitations under the License.
  */
 
-package online.aquan.index12306.biz.ticketservice.dao.mapper;
+package online.aquan.index12306.biz.ticketservice.dto.req;
 
-import com.baomidou.mybatisplus.core.mapper.BaseMapper;
-import online.aquan.index12306.biz.ticketservice.dao.entity.SeatDO;
-import online.aquan.index12306.biz.ticketservice.dto.domain.SeatTypeCountDTO;
-import org.apache.ibatis.annotations.Param;
+import lombok.Data;
+import online.aquan.index12306.biz.ticketservice.dto.domain.PurchaseTicketPassengerDetailDTO;
 
 import java.util.List;
 
-public interface SeatMapper extends BaseMapper<SeatDO> {
-    /**
-     * 获取列车车厢余票集合
-     */
-    List<Integer> listSeatRemainingTicket(@Param("seatDO") SeatDO seatDO, @Param("trainCarriageList") List<String> trainCarriageList);
+/**
+ * 购票请求入参
+ *
+ */
+@Data
+public class PurchaseTicketReqDTO {
 
     /**
-     * 获取列车 startStation 到 endStation 区间可用座位集合
+     * 车次 ID
      */
-    List<SeatTypeCountDTO> listSeatTypeCount(@Param("trainId") Long trainId, @Param("startStation") String startStation, @Param("endStation") String endStation, @Param("seatTypes")  List<Integer> seatTypes);
+    private String trainId;
+
+    /**
+     * 乘车人
+     */
+    private List<PurchaseTicketPassengerDetailDTO> passengers;
+
+    /**
+     * 选择座位
+     */
+    private List<String> chooseSeats;
+
+    /**
+     * 出发站点
+     */
+    private String departure;
+
+    /**
+     * 到达站点
+     */
+    private String arrival;
 }
-

@@ -17,7 +17,6 @@
 
 package online.aquan.index12306.biz.ticketservice.toolkit;
 
-
 import online.aquan.index12306.biz.ticketservice.dto.domain.RouteDTO;
 
 import java.util.ArrayList;
@@ -40,7 +39,7 @@ public final class StationCalculateUtil {
      */
     public static List<RouteDTO> throughStation(List<String> stations, String startStation, String endStation) {
         List<RouteDTO> routesToDeduct = new ArrayList<>();
-        //获取到用户的开始站点和结束站点在列车所有站点中的下标
+        // 获取到用户的开始站点和结束站点在列车所有站点中的下标
         int startIndex = stations.indexOf(startStation);
         int endIndex = stations.indexOf(endStation);
         if (startIndex < 0 || endIndex < 0 || startIndex >= endIndex) {
@@ -54,7 +53,7 @@ public final class StationCalculateUtil {
                 routesToDeduct.add(routeDTO);
             }
         }
-        //获取到在a,b,c,d中,如果用户从a-d,那么返回(a-b,a-c,a-d,b-c,b-d,c-d)这个集合
+        // 获取到在a,b,c,d中,如果用户从a-d,那么返回(a-b,a-c,a-d,b-c,b-d,c-d)这个集合
         return routesToDeduct;
     }
 

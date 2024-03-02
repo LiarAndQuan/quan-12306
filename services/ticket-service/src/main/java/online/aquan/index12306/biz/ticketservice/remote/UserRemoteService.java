@@ -15,24 +15,26 @@
  * limitations under the License.
  */
 
-package online.aquan.index12306.biz.ticketservice.dao.mapper;
+package online.aquan.index12306.biz.ticketservice.remote;
 
-import com.baomidou.mybatisplus.core.mapper.BaseMapper;
-import online.aquan.index12306.biz.ticketservice.dao.entity.SeatDO;
-import online.aquan.index12306.biz.ticketservice.dto.domain.SeatTypeCountDTO;
-import org.apache.ibatis.annotations.Param;
+import online.aquan.index12306.biz.ticketservice.dto.resp.PassengerRespDTO;
+import online.aquan.index12306.framework.starter.convention.result.Result;
+import org.springframework.cloud.openfeign.FeignClient;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 
 import java.util.List;
 
-public interface SeatMapper extends BaseMapper<SeatDO> {
-    /**
-     * 获取列车车厢余票集合
-     */
-    List<Integer> listSeatRemainingTicket(@Param("seatDO") SeatDO seatDO, @Param("trainCarriageList") List<String> trainCarriageList);
+/**
+ * 用户远程服务调用
+ *
+ */
+@FeignClient(value = "index12306-user${unique-name:}-service", url = "${aggregation.remote-url:}")
+public interface UserRemoteService {
 
     /**
-     * 获取列车 startStation 到 endStation 区间可用座位集合
+     * 根据乘车人 ID 集合查询乘车人列表
      */
-    List<SeatTypeCountDTO> listSeatTypeCount(@Param("trainId") Long trainId, @Param("startStation") String startStation, @Param("endStation") String endStation, @Param("seatTypes")  List<Integer> seatTypes);
+    @GetMapping("/api/user-service/inner/passenger/actual/query/ids")
+    Result<List<PassengerRespDTO>> listPassengerQueryByIds(@RequestParam("username") String username, @RequestParam("ids") List<String> ids);
 }
-

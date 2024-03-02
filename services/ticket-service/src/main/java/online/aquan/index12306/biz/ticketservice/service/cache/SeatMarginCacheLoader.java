@@ -45,7 +45,6 @@ import java.util.concurrent.TimeUnit;
 import static online.aquan.index12306.biz.ticketservice.common.constant.Index12306Constant.ADVANCE_TICKET_DAY;
 import static online.aquan.index12306.biz.ticketservice.common.constant.RedisKeyConstant.*;
 
-
 /**
  * 座位余量缓存加载
  *
@@ -62,26 +61,25 @@ public class SeatMarginCacheLoader {
 
     public Map<String, String> load(String trainId, String seatType, String departure, String arrival) {
         Map<String, Map<String, String>> trainStationRemainingTicketMaps = new LinkedHashMap<>();
-        //获取票key的后缀
+        // 获取票key的后缀
         String keySuffix = CacheUtil.buildKey(trainId, departure, arrival);
         RLock lock = redissonClient.getLock(String.format(LOCK_SAFE_LOAD_SEAT_MARGIN_GET, keySuffix));
         lock.lock();
         try {
-            //通过缓存获取票的数量
+            // 通过缓存获取票的数量
             StringRedisTemplate stringRedisTemplate = (StringRedisTemplate) distributedCache.getInstance();
             Object quantityObj = stringRedisTemplate.opsForHash().get(TRAIN_STATION_REMAINING_TICKET + keySuffix, seatType);
-            //如果缓存为空
+            // 如果缓存为空
             if (CacheUtil.isNullOrBlank(quantityObj)) {
-                //先拿到列车信息
+                // 先拿到列车信息
                 TrainDO trainDO = distributedCache.safeGet(
                         TRAIN_INFO + trainId,
                         TrainDO.class,
                         () -> trainMapper.selectById(trainId),
                         ADVANCE_TICKET_DAY,
-                        TimeUnit.DAYS
-                );
-                //根据列车id,开始站点和结束站点
-                //获取到在a,b,c,d中,如果用户从a-d,那么返回(a-b,a-c,a-d,b-c,b-d,c-d)这个集合
+                        TimeUnit.DAYS);
+                // 根据列车id,开始站点和结束站点
+                // 获取到在a,b,c,d中,如果用户从a-d,那么返回(a-b,a-c,a-d,b-c,b-d,c-d)这个集合
                 List<RouteDTO> routeDTOList = trainStationService.listTrainStationRoute(trainId, trainDO.getStartStation(), trainDO.getEndStation());
                 if (CollUtil.isNotEmpty(routeDTOList)) {
                     switch (trainDO.getTrainType()) {
@@ -89,13 +87,13 @@ public class SeatMarginCacheLoader {
                         case 0 -> {
                             for (RouteDTO each : routeDTOList) {
                                 Map<String, String> trainStationRemainingTicket = new LinkedHashMap<>();
-                                //获取出对应座位类型的数量
+                                // 获取出对应座位类型的数量
                                 trainStationRemainingTicket.put("0", selectSeatMargin(trainId, 0, each.getStartStation(), each.getEndStation()));
                                 trainStationRemainingTicket.put("1", selectSeatMargin(trainId, 1, each.getStartStation(), each.getEndStation()));
                                 trainStationRemainingTicket.put("2", selectSeatMargin(trainId, 2, each.getStartStation(), each.getEndStation()));
                                 String actualKeySuffix = CacheUtil.buildKey(trainId, each.getStartStation(), each.getEndStation());
-                                //map结构为:
-                                //{列车id+起点+终点:{座位类型:票数}}
+                                // map结构为:
+                                // {列车id+起点+终点:{座位类型:票数}}
                                 trainStationRemainingTicketMaps.put(TRAIN_STATION_REMAINING_TICKET + actualKeySuffix, trainStationRemainingTicket);
                             }
                         }
@@ -123,15 +121,15 @@ public class SeatMarginCacheLoader {
                         }
                     }
                 } else {
-                    //如果上面的站点关系为null
+                    // 如果上面的站点关系为null
                     Map<String, String> trainStationRemainingTicket = new LinkedHashMap<>();
-                    //那么根据列车类型取得所有的座位类型,然后票数置为0就好了
+                    // 那么根据列车类型取得所有的座位类型,然后票数置为0就好了
                     VehicleTypeEnum.findSeatTypesByCode(trainDO.getTrainType())
                             .forEach(each -> trainStationRemainingTicket.put(String.valueOf(each), "0"));
                     trainStationRemainingTicketMaps.put(TRAIN_STATION_REMAINING_TICKET + keySuffix, trainStationRemainingTicket);
                 }
                 // TODO LUA 脚本执行
-                //然后将{列车id+起点+终点:{座位类型:票数}}放入缓存中即可
+                // 然后将{列车id+起点+终点:{座位类型:票数}}放入缓存中即可
                 trainStationRemainingTicketMaps.forEach((cacheKey, cacheMap) -> stringRedisTemplate.opsForHash().putAll(cacheKey, cacheMap));
             }
         } finally {

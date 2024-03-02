@@ -15,22 +15,24 @@
  * limitations under the License.
  */
 
-package online.aquan.index12306.biz.ticketservice.common.enums;
+package online.aquan.index12306.biz.ticketservice.remote;
 
-/**
- * 购票相关责任链 Mark 枚举
- *
- */
-public enum TicketChainMarkEnum {
+import online.aquan.index12306.biz.ticketservice.remote.dto.TicketOrderCreateRemoteReqDTO;
+import online.aquan.index12306.framework.starter.convention.result.Result;
+import org.springframework.cloud.openfeign.FeignClient;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 
-    /**
-     * 车票查询过滤器
-     */
-    TRAIN_QUERY_FILTER,
+@FeignClient(value = "index12306-order${unique-name:}-service", url = "${aggregation.remote-url:}")
+public interface TicketOrderRemoteService {
 
     /**
-     * 车票购买过滤器
+     * 创建车票订单
+     *
+     * @param requestParam 创建车票订单请求参数
+     * @return 订单号
      */
-    TRAIN_PURCHASE_TICKET_FILTER,
+    @PostMapping("/api/order-service/order/ticket/create")
+    Result<String> createTicketOrder(@RequestBody TicketOrderCreateRemoteReqDTO requestParam);
 
 }

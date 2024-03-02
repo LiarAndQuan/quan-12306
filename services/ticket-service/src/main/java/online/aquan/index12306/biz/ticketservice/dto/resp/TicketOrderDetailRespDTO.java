@@ -15,22 +15,60 @@
  * limitations under the License.
  */
 
-package online.aquan.index12306.biz.ticketservice.common.enums;
+package online.aquan.index12306.biz.ticketservice.dto.resp;
+
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
 /**
- * 购票相关责任链 Mark 枚举
+ * 车票订单详情返回参数
  *
  */
-public enum TicketChainMarkEnum {
+@Data
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
+public class TicketOrderDetailRespDTO {
 
     /**
-     * 车票查询过滤器
+     * 席别类型
      */
-    TRAIN_QUERY_FILTER,
+    private Integer seatType;
 
     /**
-     * 车票购买过滤器
+     * 车厢号
      */
-    TRAIN_PURCHASE_TICKET_FILTER,
+    private String carriageNumber;
 
+    /**
+     * 座位号
+     */
+    private String seatNumber;
+
+    /**
+     * 真实姓名
+     */
+    private String realName;
+
+    /**
+     * 证件类型
+     */
+    private Integer idType;
+
+    /**
+     * 证件号
+     */
+    private String idCard;
+
+    /**
+     * 车票类型 0：成人 1：儿童 2：学生 3：残疾军人
+     */
+    private Integer ticketType;
+
+    /**
+     * 订单金额
+     */
+    private Integer amount;
 }

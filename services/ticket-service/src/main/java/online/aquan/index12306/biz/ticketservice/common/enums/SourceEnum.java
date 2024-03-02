@@ -15,10 +15,28 @@
  * limitations under the License.
  */
 
-package online.aquan.index12306.biz.ticketservice.dao.mapper;
+package online.aquan.index12306.biz.ticketservice.common.enums;
 
-import com.baomidou.mybatisplus.core.mapper.BaseMapper;
-import online.aquan.index12306.biz.ticketservice.dao.entity.TrainStationRelationDO;
+import lombok.Getter;
+import lombok.RequiredArgsConstructor;
 
-public interface TrainStationRelationMapper extends BaseMapper<TrainStationRelationDO> {
+/**
+ * 购票来源
+ *
+ */
+@RequiredArgsConstructor
+public enum SourceEnum {
+
+    /**
+     * 互联网购票
+     */
+    INTERNET(0),
+
+    /**
+     * 线下窗口购票
+     */
+    OFFLINE(1);
+
+    @Getter
+    private final Integer code;
 }

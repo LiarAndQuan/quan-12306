@@ -15,10 +15,24 @@
  * limitations under the License.
  */
 
-package online.aquan.index12306.biz.ticketservice.dao.mapper;
+package online.aquan.index12306.biz.ticketservice.dto.domain;
 
-import com.baomidou.mybatisplus.core.mapper.BaseMapper;
-import online.aquan.index12306.biz.ticketservice.dao.entity.TrainStationRelationDO;
+import lombok.Data;
 
-public interface TrainStationRelationMapper extends BaseMapper<TrainStationRelationDO> {
+/**
+ * 购票乘车人详情实体
+ *
+ */
+@Data
+public class PurchaseTicketPassengerDetailDTO {
+
+    /**
+     * 乘车人 ID
+     */
+    private String passengerId;
+
+    /**
+     * 座位类型
+     */
+    private Integer seatType;
 }

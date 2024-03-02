@@ -17,7 +17,6 @@
 
 package online.aquan.index12306.biz.ticketservice.toolkit;
 
-
 import online.aquan.index12306.biz.ticketservice.dto.domain.TicketListDTO;
 
 import java.time.LocalTime;

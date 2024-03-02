@@ -17,7 +17,6 @@
 
 package online.aquan.index12306.biz.ticketservice.service.handler.ticket.filter.query;
 
-
 import online.aquan.index12306.biz.ticketservice.common.enums.TicketChainMarkEnum;
 import online.aquan.index12306.biz.ticketservice.dto.req.TicketPageQueryReqDTO;
 import online.aquan.index12306.framework.starter.designpattern.chain.AbstractChainHandler;

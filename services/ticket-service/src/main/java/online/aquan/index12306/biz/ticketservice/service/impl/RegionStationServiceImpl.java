@@ -1,3 +1,20 @@
+/*
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.
+ * The ASF licenses this file to You under the Apache License, Version 2.0
+ * (the "License"); you may not use this file except in compliance with
+ * the License.  You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package online.aquan.index12306.biz.ticketservice.service.impl;
 
 import cn.hutool.core.collection.CollUtil;
@@ -35,7 +52,7 @@ import static online.aquan.index12306.biz.ticketservice.common.constant.RedisKey
 @Service
 @RequiredArgsConstructor
 public class RegionStationServiceImpl implements RegionStationService {
-    
+
     private final StationMapper stationMapper;
     private final RegionMapper regionMapper;
     private final DistributedCache distributedCache;
@@ -44,12 +61,12 @@ public class RegionStationServiceImpl implements RegionStationService {
     @Override
     public List<RegionStationQueryRespDTO> listRegionStation(RegionStationQueryReqDTO requestParam) {
         String key;
-        //如果传入了车站名,那么直接根据名字查询对应的站点即可
+        // 如果传入了车站名,那么直接根据名字查询对应的站点即可
         if (StrUtil.isNotBlank(requestParam.getName())) {
-            key  = REGION_STATION  + requestParam.getName();
+            key = REGION_STATION + requestParam.getName();
             return safeGetRegionStation(
-                    key ,
-                    //这里的就是传入了缓存不存在时的调用逻辑,只有不存在时会被调用然后放入缓存并返回这个数据
+                    key,
+                    // 这里的就是传入了缓存不存在时的调用逻辑,只有不存在时会被调用然后放入缓存并返回这个数据
                     () -> {
                         LambdaQueryWrapper<StationDO> queryWrapper = Wrappers.lambdaQuery(StationDO.class)
                                 .likeRight(StationDO::getName, requestParam.getName())
@@ -58,13 +75,12 @@ public class RegionStationServiceImpl implements RegionStationService {
                         List<StationDO> stationDOList = stationMapper.selectList(queryWrapper);
                         return JSON.toJSONString(BeanUtil.convert(stationDOList, RegionStationQueryRespDTO.class));
                     },
-                    requestParam.getName()
-            );
+                    requestParam.getName());
         }
-        //没有传入车站名,那么就看前端传入的type字段来查询地区,并且更新key值
-        key  = REGION_STATION  + requestParam.getQueryType();
+        // 没有传入车站名,那么就看前端传入的type字段来查询地区,并且更新key值
+        key = REGION_STATION + requestParam.getQueryType();
         LambdaQueryWrapper<RegionDO> queryWrapper = switch (requestParam.getQueryType()) {
-            //如果为0,那么查询热门地区,否则根据映射关系查询对应首字母的站点并返回
+            // 如果为0,那么查询热门地区,否则根据映射关系查询对应首字母的站点并返回
             case 0 -> Wrappers.lambdaQuery(RegionDO.class)
                     .eq(RegionDO::getPopularFlag, FlagEnum.TRUE.code());
             case 1 -> Wrappers.lambdaQuery(RegionDO.class)
@@ -85,24 +101,23 @@ public class RegionStationServiceImpl implements RegionStationService {
                     List<RegionDO> regionDOList = regionMapper.selectList(queryWrapper);
                     return JSON.toJSONString(BeanUtil.convert(regionDOList, RegionStationQueryRespDTO.class));
                 },
-                String.valueOf(requestParam.getQueryType())
-        );
+                String.valueOf(requestParam.getQueryType()));
     }
 
-    private  List<RegionStationQueryRespDTO> safeGetRegionStation(final String key, CacheLoader<String> loader, String param) {
+    private List<RegionStationQueryRespDTO> safeGetRegionStation(final String key, CacheLoader<String> loader, String param) {
         List<RegionStationQueryRespDTO> result;
-        //如果缓存中可以找到地区,那么直接返回就可以了
+        // 如果缓存中可以找到地区,那么直接返回就可以了
         if (CollUtil.isNotEmpty(result = JSON.parseArray(distributedCache.get(key, String.class), RegionStationQueryRespDTO.class))) {
             return result;
         }
-        //否则的话就加锁,因为如果大量请求都重复请求这个接口那么会出问题,最好是加锁之后后续查询直接走缓存
+        // 否则的话就加锁,因为如果大量请求都重复请求这个接口那么会出问题,最好是加锁之后后续查询直接走缓存
         String lockKey = String.format(LOCK_QUERY_REGION_STATION_LIST, param);
         RLock lock = redissonClient.getLock(lockKey);
         lock.lock();
         try {
-            //这里采取二次缓存判断
+            // 这里采取二次缓存判断
             if (CollUtil.isEmpty(result = JSON.parseArray(distributedCache.get(key, String.class), RegionStationQueryRespDTO.class))) {
-                //如果还是为空,那么调用loadAndSet方法从数据库中获取出真正的数据
+                // 如果还是为空,那么调用loadAndSet方法从数据库中获取出真正的数据
                 if (CollUtil.isEmpty(result = loadAndSet(key, loader))) {
                     return Collections.emptyList();
                 }
@@ -114,19 +129,18 @@ public class RegionStationServiceImpl implements RegionStationService {
     }
 
     private List<RegionStationQueryRespDTO> loadAndSet(final String key, CacheLoader<String> loader) {
-        //这里的loader.load()方法就是传入了从数据库中查找数据的方法
+        // 这里的loader.load()方法就是传入了从数据库中查找数据的方法
         String result = loader.load();
         if (CacheUtil.isNullOrBlank(result)) {
             return Collections.emptyList();
         }
-        //查询之后将其保存在缓存中
+        // 查询之后将其保存在缓存中
         List<RegionStationQueryRespDTO> respDTOList = JSON.parseArray(result, RegionStationQueryRespDTO.class);
         distributedCache.put(
                 key,
                 result,
                 ADVANCE_TICKET_DAY,
-                TimeUnit.DAYS
-        );
+                TimeUnit.DAYS);
         return respDTOList;
     }
 
@@ -137,7 +151,6 @@ public class RegionStationServiceImpl implements RegionStationService {
                 List.class,
                 () -> BeanUtil.convert(stationMapper.selectList(Wrappers.emptyWrapper()), StationQueryRespDTO.class),
                 ADVANCE_TICKET_DAY,
-                TimeUnit.DAYS
-        );
+                TimeUnit.DAYS);
     }
 }
