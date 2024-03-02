@@ -3,7 +3,9 @@ package online.aquan.index12306.biz.orderservice.service;
 import online.aquan.index12306.biz.orderservice.dto.req.CancelTicketOrderReqDTO;
 import online.aquan.index12306.biz.orderservice.dto.req.TicketOrderCreateReqDTO;
 import online.aquan.index12306.biz.orderservice.dto.req.TicketOrderPageQueryReqDTO;
+import online.aquan.index12306.biz.orderservice.dto.req.TicketOrderSelfPageQueryReqDTO;
 import online.aquan.index12306.biz.orderservice.dto.resp.TicketOrderDetailRespDTO;
+import online.aquan.index12306.biz.orderservice.dto.resp.TicketOrderDetailSelfRespDTO;
 import online.aquan.index12306.framework.starter.convention.page.PageResponse;
 
 public interface OrderService {
@@ -46,4 +48,11 @@ public interface OrderService {
      */
     PageResponse<TicketOrderDetailRespDTO> pageTicketOrder(TicketOrderPageQueryReqDTO requestParam);
 
+    /**
+     * 查询本人车票订单
+     *
+     * @param requestParam 请求参数
+     * @return 本人车票订单集合
+     */
+    PageResponse<TicketOrderDetailSelfRespDTO> pageSelfTicketOrder(TicketOrderSelfPageQueryReqDTO requestParam);
 }

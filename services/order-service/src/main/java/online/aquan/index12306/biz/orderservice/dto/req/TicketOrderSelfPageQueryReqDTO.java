@@ -15,20 +15,15 @@
  * limitations under the License.
  */
 
-package online.aquan.index12306.biz.orderservice;
+package online.aquan.index12306.biz.orderservice.dto.req;
 
-import org.mybatis.spring.annotation.MapperScan;
-import org.springframework.boot.SpringApplication;
-import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.cloud.openfeign.EnableFeignClients;
+import lombok.Data;
+import online.aquan.index12306.framework.starter.convention.page.PageRequest;
 
-@SpringBootApplication
-@MapperScan("online.aquan.index12306.biz.orderservice.dao.mapper")
-@EnableFeignClients("online.aquan.index12306.biz.orderservice.remote")
-public class OrderServiceApplication {
-
-    public static void main(String[] args) {
-        SpringApplication.run(OrderServiceApplication.class, args);
-    }
-
+/**
+ * 本人车票订单分页查询
+ *
+ */
+@Data
+public class TicketOrderSelfPageQueryReqDTO extends PageRequest {
 }

@@ -17,14 +17,14 @@ import online.aquan.index12306.biz.orderservice.dao.entity.OrderItemDO;
 import online.aquan.index12306.biz.orderservice.dao.entity.OrderItemPassengerDO;
 import online.aquan.index12306.biz.orderservice.dao.mapper.OrderItemMapper;
 import online.aquan.index12306.biz.orderservice.dao.mapper.OrderMapper;
-import online.aquan.index12306.biz.orderservice.dto.req.CancelTicketOrderReqDTO;
-import online.aquan.index12306.biz.orderservice.dto.req.TicketOrderCreateReqDTO;
-import online.aquan.index12306.biz.orderservice.dto.req.TicketOrderItemCreateReqDTO;
-import online.aquan.index12306.biz.orderservice.dto.req.TicketOrderPageQueryReqDTO;
+import online.aquan.index12306.biz.orderservice.dto.req.*;
 import online.aquan.index12306.biz.orderservice.dto.resp.TicketOrderDetailRespDTO;
+import online.aquan.index12306.biz.orderservice.dto.resp.TicketOrderDetailSelfRespDTO;
 import online.aquan.index12306.biz.orderservice.dto.resp.TicketOrderPassengerDetailRespDTO;
 import online.aquan.index12306.biz.orderservice.mq.event.DelayCloseOrderEvent;
 import online.aquan.index12306.biz.orderservice.mq.produce.DelayCloseOrderSendProduce;
+import online.aquan.index12306.biz.orderservice.remote.UserRemoteService;
+import online.aquan.index12306.biz.orderservice.remote.dto.UserQueryActualRespDTO;
 import online.aquan.index12306.biz.orderservice.service.OrderItemService;
 import online.aquan.index12306.biz.orderservice.service.OrderPassengerRelationService;
 import online.aquan.index12306.biz.orderservice.service.OrderService;
@@ -33,7 +33,9 @@ import online.aquan.index12306.framework.starter.common.toolkit.BeanUtil;
 import online.aquan.index12306.framework.starter.convention.exception.ClientException;
 import online.aquan.index12306.framework.starter.convention.exception.ServiceException;
 import online.aquan.index12306.framework.starter.convention.page.PageResponse;
+import online.aquan.index12306.framework.starter.convention.result.Result;
 import online.aquan.index12306.framework.starter.database.toolkit.PageUtil;
+import online.aquan.index12306.frameworks.starter.user.core.UserContext;
 import org.apache.rocketmq.client.producer.SendResult;
 import org.apache.rocketmq.client.producer.SendStatus;
 import org.redisson.api.RLock;
@@ -56,6 +58,7 @@ public class OrderServiceImpl implements OrderService {
     private final DelayCloseOrderSendProduce delayCloseOrderSendProduce;
     private final RedissonClient redissonClient;
     private final OrderItemMapper orderItemMapper;
+    private final UserRemoteService userRemoteService;
 
     @Transactional(rollbackFor = Exception.class)
     @Override
@@ -240,5 +243,31 @@ public class OrderServiceImpl implements OrderService {
             );
         }
         return result;
+    }
+
+    @Override
+    public PageResponse<TicketOrderDetailSelfRespDTO> pageSelfTicketOrder(TicketOrderSelfPageQueryReqDTO requestParam) {
+        //获取到用户的真实信息
+        Result<UserQueryActualRespDTO> userActualResp = userRemoteService.queryActualUserByUsername(UserContext.getUsername());
+        LambdaQueryWrapper<OrderItemPassengerDO> queryWrapper = Wrappers.lambdaQuery(OrderItemPassengerDO.class)
+                .eq(OrderItemPassengerDO::getIdCard, userActualResp.getData().getIdCard())
+                .orderByDesc(OrderItemPassengerDO::getCreateTime);
+        //分页查询到自己的idcard下的订单号
+        IPage<OrderItemPassengerDO> orderItemPassengerPage = orderPassengerRelationService.page(PageUtil.convert(requestParam), queryWrapper);
+        return PageUtil.convert(orderItemPassengerPage, each -> {
+            //根据订单号找到订单
+            LambdaQueryWrapper<OrderDO> orderQueryWrapper = Wrappers.lambdaQuery(OrderDO.class)
+                    .eq(OrderDO::getOrderSn, each.getOrderSn());
+            OrderDO orderDO = orderMapper.selectOne(orderQueryWrapper);
+            //然后在根据订单号和idcard找到详细的item
+            LambdaQueryWrapper<OrderItemDO> orderItemQueryWrapper = Wrappers.lambdaQuery(OrderItemDO.class)
+                    .eq(OrderItemDO::getOrderSn, each.getOrderSn())
+                    .eq(OrderItemDO::getIdCard, each.getIdCard());
+            OrderItemDO orderItemDO = orderItemMapper.selectOne(orderItemQueryWrapper);
+            //组装返回结果
+            TicketOrderDetailSelfRespDTO actualResult = BeanUtil.convert(orderDO, TicketOrderDetailSelfRespDTO.class);
+            BeanUtil.convertIgnoreNullAndBlank(orderItemDO, actualResult);
+            return actualResult;
+        });
     }
 }

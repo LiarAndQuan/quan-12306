@@ -2,11 +2,9 @@ package online.aquan.index12306.biz.orderservice.controller;
 
 import cn.crane4j.annotation.AutoOperate;
 import lombok.RequiredArgsConstructor;
-import online.aquan.index12306.biz.orderservice.dto.req.CancelTicketOrderReqDTO;
-import online.aquan.index12306.biz.orderservice.dto.req.TicketOrderCreateReqDTO;
-import online.aquan.index12306.biz.orderservice.dto.req.TicketOrderItemQueryReqDTO;
-import online.aquan.index12306.biz.orderservice.dto.req.TicketOrderPageQueryReqDTO;
+import online.aquan.index12306.biz.orderservice.dto.req.*;
 import online.aquan.index12306.biz.orderservice.dto.resp.TicketOrderDetailRespDTO;
+import online.aquan.index12306.biz.orderservice.dto.resp.TicketOrderDetailSelfRespDTO;
 import online.aquan.index12306.biz.orderservice.dto.resp.TicketOrderPassengerDetailRespDTO;
 import online.aquan.index12306.biz.orderservice.service.OrderItemService;
 import online.aquan.index12306.biz.orderservice.service.OrderService;
@@ -70,5 +68,13 @@ public class TicketOrderController {
     @GetMapping("/api/order-service/order/ticket/page")
     public Result<PageResponse<TicketOrderDetailRespDTO>> pageTicketOrder(TicketOrderPageQueryReqDTO requestParam) {
         return Results.success(orderService.pageTicketOrder(requestParam));
+    }
+
+    /**
+     * 分页查询本人车票订单
+     */
+    @GetMapping("/api/order-service/order/ticket/self/page")
+    public Result<PageResponse<TicketOrderDetailSelfRespDTO>> pageSelfTicketOrder(TicketOrderSelfPageQueryReqDTO requestParam) {
+        return Results.success(orderService.pageSelfTicketOrder(requestParam));
     }
 }
