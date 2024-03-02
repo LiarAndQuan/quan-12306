@@ -1,5 +1,6 @@
 package online.aquan.index12306.biz.orderservice.service;
 
+import online.aquan.index12306.biz.orderservice.dto.req.CancelTicketOrderReqDTO;
 import online.aquan.index12306.biz.orderservice.dto.req.TicketOrderCreateReqDTO;
 
 public interface OrderService {
@@ -11,4 +12,12 @@ public interface OrderService {
      * @return 订单号
      */
     String createTicketOrder(TicketOrderCreateReqDTO requestParam);
+
+    /**
+     * 关闭火车票订单
+     *
+     * @param requestParam 关闭火车票订单入参
+     */
+    boolean closeTickOrder(CancelTicketOrderReqDTO requestParam);
+
 }

@@ -1,13 +1,21 @@
 package online.aquan.index12306.biz.orderservice.service.impl;
 
+import cn.hutool.core.text.StrBuilder;
 import com.alibaba.fastjson2.JSON;
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
+import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import online.aquan.index12306.biz.orderservice.common.enums.OrderCanalErrorCodeEnum;
+import online.aquan.index12306.biz.orderservice.common.enums.OrderItemStatusEnum;
 import online.aquan.index12306.biz.orderservice.common.enums.OrderStatusEnum;
 import online.aquan.index12306.biz.orderservice.dao.entity.OrderDO;
 import online.aquan.index12306.biz.orderservice.dao.entity.OrderItemDO;
 import online.aquan.index12306.biz.orderservice.dao.entity.OrderItemPassengerDO;
+import online.aquan.index12306.biz.orderservice.dao.mapper.OrderItemMapper;
 import online.aquan.index12306.biz.orderservice.dao.mapper.OrderMapper;
+import online.aquan.index12306.biz.orderservice.dto.req.CancelTicketOrderReqDTO;
 import online.aquan.index12306.biz.orderservice.dto.req.TicketOrderCreateReqDTO;
 import online.aquan.index12306.biz.orderservice.dto.req.TicketOrderItemCreateReqDTO;
 import online.aquan.index12306.biz.orderservice.mq.event.DelayCloseOrderEvent;
@@ -16,9 +24,12 @@ import online.aquan.index12306.biz.orderservice.service.OrderItemService;
 import online.aquan.index12306.biz.orderservice.service.OrderPassengerRelationService;
 import online.aquan.index12306.biz.orderservice.service.OrderService;
 import online.aquan.index12306.biz.orderservice.service.orderid.OrderIdGeneratorManager;
+import online.aquan.index12306.framework.starter.convention.exception.ClientException;
 import online.aquan.index12306.framework.starter.convention.exception.ServiceException;
 import org.apache.rocketmq.client.producer.SendResult;
 import org.apache.rocketmq.client.producer.SendStatus;
+import org.redisson.api.RLock;
+import org.redisson.api.RedissonClient;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -35,6 +46,8 @@ public class OrderServiceImpl implements OrderService {
     private final OrderItemService orderItemService;
     private final OrderPassengerRelationService orderPassengerRelationService;
     private final DelayCloseOrderSendProduce delayCloseOrderSendProduce;
+    private final RedissonClient redissonClient;
+    private final OrderItemMapper orderItemMapper;
 
     @Transactional(rollbackFor = Exception.class)
     @Override
@@ -109,5 +122,63 @@ public class OrderServiceImpl implements OrderService {
             throw ex;
         }
         return orderSn;
+    }
+
+    public boolean closeTickOrder(CancelTicketOrderReqDTO requestParam) {
+        String orderSn = requestParam.getOrderSn();
+        LambdaQueryWrapper<OrderDO> queryWrapper = Wrappers.lambdaQuery(OrderDO.class)
+                .eq(OrderDO::getOrderSn, orderSn)
+                .select(OrderDO::getStatus);
+        OrderDO orderDO = orderMapper.selectOne(queryWrapper);
+        //查询数据库中是否有这条订单,并且验证订单是否处于未支付状态
+        if (Objects.isNull(orderDO) || orderDO.getStatus() != OrderStatusEnum.PENDING_PAYMENT.getStatus()) {
+            return false;
+        }
+        // 原则上订单关闭和订单取消这两个方法可以复用，为了区分未来考虑到的场景，这里对方法进行拆分但复用逻辑
+        return cancelTickOrder(requestParam);
+    }
+
+    public boolean cancelTickOrder(CancelTicketOrderReqDTO requestParam) {
+        //获取到订单
+        String orderSn = requestParam.getOrderSn();
+        LambdaQueryWrapper<OrderDO> queryWrapper = Wrappers.lambdaQuery(OrderDO.class)
+                .eq(OrderDO::getOrderSn, orderSn);
+        OrderDO orderDO = orderMapper.selectOne(queryWrapper);
+        //如果订单不为null或者订单状态不为未支付,则抛出异常
+        if (orderDO == null) {
+            throw new ServiceException(OrderCanalErrorCodeEnum.ORDER_CANAL_UNKNOWN_ERROR);
+        } else if (orderDO.getStatus() != OrderStatusEnum.PENDING_PAYMENT.getStatus()) {
+            throw new ServiceException(OrderCanalErrorCodeEnum.ORDER_CANAL_STATUS_ERROR);
+        }
+        //锁住
+        RLock lock = redissonClient.getLock(StrBuilder.create("order:canal:order_sn_").append(orderSn).toString());
+        if (!lock.tryLock()) {
+            throw new ClientException(OrderCanalErrorCodeEnum.ORDER_CANAL_REPETITION_ERROR);
+        }
+        try {
+            //操作数据库改变订单状态
+            OrderDO updateOrderDO = new OrderDO();
+            updateOrderDO.setStatus(OrderStatusEnum.CLOSED.getStatus());
+            updateOrderDO.setOrderSn(orderSn);
+            LambdaUpdateWrapper<OrderDO> updateWrapper = Wrappers.lambdaUpdate(OrderDO.class)
+                    .eq(OrderDO::getOrderSn, orderSn);
+            int updateResult = orderMapper.update(updateOrderDO, updateWrapper);
+            if (updateResult <= 0) {
+                throw new ServiceException(OrderCanalErrorCodeEnum.ORDER_CANAL_ERROR);
+            }
+            //订单的item状态也需要改变
+            OrderItemDO updateOrderItemDO = new OrderItemDO();
+            updateOrderItemDO.setStatus(OrderItemStatusEnum.CLOSED.getStatus());
+            updateOrderItemDO.setOrderSn(orderSn);
+            LambdaUpdateWrapper<OrderItemDO> updateItemWrapper = Wrappers.lambdaUpdate(OrderItemDO.class)
+                    .eq(OrderItemDO::getOrderSn, orderSn);
+            int updateItemResult = orderItemMapper.update(updateOrderItemDO, updateItemWrapper);
+            if (updateItemResult <= 0) {
+                throw new ServiceException(OrderCanalErrorCodeEnum.ORDER_CANAL_ERROR);
+            }
+        } finally {
+            lock.unlock();
+        }
+        return true;
     }
 }
