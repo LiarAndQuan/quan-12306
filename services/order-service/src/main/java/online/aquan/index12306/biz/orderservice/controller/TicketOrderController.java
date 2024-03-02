@@ -1,13 +1,16 @@
 package online.aquan.index12306.biz.orderservice.controller;
 
+import cn.crane4j.annotation.AutoOperate;
 import lombok.RequiredArgsConstructor;
 import online.aquan.index12306.biz.orderservice.dto.req.CancelTicketOrderReqDTO;
 import online.aquan.index12306.biz.orderservice.dto.req.TicketOrderCreateReqDTO;
 import online.aquan.index12306.biz.orderservice.dto.req.TicketOrderItemQueryReqDTO;
+import online.aquan.index12306.biz.orderservice.dto.req.TicketOrderPageQueryReqDTO;
 import online.aquan.index12306.biz.orderservice.dto.resp.TicketOrderDetailRespDTO;
 import online.aquan.index12306.biz.orderservice.dto.resp.TicketOrderPassengerDetailRespDTO;
 import online.aquan.index12306.biz.orderservice.service.OrderItemService;
 import online.aquan.index12306.biz.orderservice.service.OrderService;
+import online.aquan.index12306.framework.starter.convention.page.PageResponse;
 import online.aquan.index12306.framework.starter.convention.result.Result;
 import online.aquan.index12306.framework.starter.web.Results;
 import org.springframework.web.bind.annotation.*;
@@ -59,5 +62,13 @@ public class TicketOrderController {
     public Result<List<TicketOrderPassengerDetailRespDTO>> queryTicketItemOrderById(TicketOrderItemQueryReqDTO requestParam) {
         return Results.success(orderItemService.queryTicketItemOrderById(requestParam));
     }
-    
+
+    /**
+     * 根据用户id分页查询车票订单
+     */
+    @AutoOperate(type = TicketOrderDetailRespDTO.class, on = "data.records")
+    @GetMapping("/api/order-service/order/ticket/page")
+    public Result<PageResponse<TicketOrderDetailRespDTO>> pageTicketOrder(TicketOrderPageQueryReqDTO requestParam) {
+        return Results.success(orderService.pageTicketOrder(requestParam));
+    }
 }
