@@ -18,12 +18,15 @@ import online.aquan.index12306.biz.orderservice.dao.mapper.OrderMapper;
 import online.aquan.index12306.biz.orderservice.dto.req.CancelTicketOrderReqDTO;
 import online.aquan.index12306.biz.orderservice.dto.req.TicketOrderCreateReqDTO;
 import online.aquan.index12306.biz.orderservice.dto.req.TicketOrderItemCreateReqDTO;
+import online.aquan.index12306.biz.orderservice.dto.resp.TicketOrderDetailRespDTO;
+import online.aquan.index12306.biz.orderservice.dto.resp.TicketOrderPassengerDetailRespDTO;
 import online.aquan.index12306.biz.orderservice.mq.event.DelayCloseOrderEvent;
 import online.aquan.index12306.biz.orderservice.mq.produce.DelayCloseOrderSendProduce;
 import online.aquan.index12306.biz.orderservice.service.OrderItemService;
 import online.aquan.index12306.biz.orderservice.service.OrderPassengerRelationService;
 import online.aquan.index12306.biz.orderservice.service.OrderService;
 import online.aquan.index12306.biz.orderservice.service.orderid.OrderIdGeneratorManager;
+import online.aquan.index12306.framework.starter.common.toolkit.BeanUtil;
 import online.aquan.index12306.framework.starter.convention.exception.ClientException;
 import online.aquan.index12306.framework.starter.convention.exception.ServiceException;
 import org.apache.rocketmq.client.producer.SendResult;
@@ -180,5 +183,20 @@ public class OrderServiceImpl implements OrderService {
             lock.unlock();
         }
         return true;
+    }
+
+    @Override
+    public TicketOrderDetailRespDTO queryTicketOrderByOrderSn(String orderSn) {
+        //找到订单记录
+        LambdaQueryWrapper<OrderDO> queryWrapper = Wrappers.lambdaQuery(OrderDO.class)
+                .eq(OrderDO::getOrderSn, orderSn);
+        OrderDO orderDO = orderMapper.selectOne(queryWrapper);
+        TicketOrderDetailRespDTO result = BeanUtil.convert(orderDO, TicketOrderDetailRespDTO.class);
+        //找到订单的item记录
+        LambdaQueryWrapper<OrderItemDO> orderItemQueryWrapper = Wrappers.lambdaQuery(OrderItemDO.class)
+                .eq(OrderItemDO::getOrderSn, orderSn);
+        List<OrderItemDO> orderItemDOList = orderItemMapper.selectList(orderItemQueryWrapper);
+        result.setPassengerDetails(BeanUtil.convert(orderItemDOList, TicketOrderPassengerDetailRespDTO.class));
+        return result;
     }
 }
