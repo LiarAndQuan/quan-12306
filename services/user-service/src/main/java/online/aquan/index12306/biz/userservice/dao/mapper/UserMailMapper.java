@@ -17,7 +17,6 @@
 
 package online.aquan.index12306.biz.userservice.dao.mapper;
 
-
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import online.aquan.index12306.biz.userservice.dao.entity.UserMailDO;
 
@@ -26,6 +25,7 @@ import online.aquan.index12306.biz.userservice.dao.entity.UserMailDO;
  *
  */
 public interface UserMailMapper extends BaseMapper<UserMailDO> {
+
     /**
      * 注销用户
      *

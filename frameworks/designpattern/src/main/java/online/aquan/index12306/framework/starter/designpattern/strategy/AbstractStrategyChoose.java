@@ -53,7 +53,7 @@ public class AbstractStrategyChoose implements ApplicationListener<ApplicationIn
                     .findFirst()
                     .orElseThrow(() -> new ServiceException("策略未定义"));
         }
-        //返回的到的对应mark的策略
+        // 返回的到的对应mark的策略
         return Optional.ofNullable(abstractExecuteStrategyMap.get(mark))
                 .orElseThrow(() -> new ServiceException(String.format("[%s] 策略未定义", mark)));
     }
@@ -67,7 +67,7 @@ public class AbstractStrategyChoose implements ApplicationListener<ApplicationIn
      */
     public <REQUEST> void chooseAndExecute(String mark, REQUEST requestParam) {
         AbstractExecuteStrategy executeStrategy = choose(mark, null);
-        //得到策略并且执行
+        // 得到策略并且执行
         executeStrategy.execute(requestParam);
     }
 
@@ -100,9 +100,9 @@ public class AbstractStrategyChoose implements ApplicationListener<ApplicationIn
 
     @Override
     public void onApplicationEvent(ApplicationInitializingEvent event) {
-        //获取到所有实现了抽象策略接口的类
+        // 获取到所有实现了抽象策略接口的类
         Map<String, AbstractExecuteStrategy> actual = ApplicationContextHolder.getBeansOfType(AbstractExecuteStrategy.class);
-        //然后根据类的名字把他们放入全局的map中
+        // 然后根据类的名字把他们放入全局的map中
         actual.forEach((beanName, bean) -> {
             AbstractExecuteStrategy beanExist = abstractExecuteStrategyMap.get(bean.mark());
             if (beanExist != null) {

@@ -17,7 +17,6 @@
 
 package online.aquan.index12306.framework.starter.designpattern.chain;
 
-
 import online.aquan.index12306.framework.starter.bases.ApplicationContextHolder;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.core.Ordered;
@@ -31,7 +30,7 @@ import java.util.stream.Collectors;
  */
 public final class AbstractChainContext<T> implements CommandLineRunner {
 
-    //全局的抽象责任链Map,里面以Mark为key,标识不同业务的责任链,value为对应责任链上面的业务处理器
+    // 全局的抽象责任链Map,里面以Mark为key,标识不同业务的责任链,value为对应责任链上面的业务处理器
     private final Map<String, List<AbstractChainHandler>> abstractChainHandlerContainer = new HashMap<>();
 
     /**
@@ -41,36 +40,36 @@ public final class AbstractChainContext<T> implements CommandLineRunner {
      * @param requestParam 请求参数
      */
     public void handler(String mark, T requestParam) {
-        //首先通过责任链上下文的map获取到对应mark的责任链上的处理对象
+        // 首先通过责任链上下文的map获取到对应mark的责任链上的处理对象
         List<AbstractChainHandler> abstractChainHandlers = abstractChainHandlerContainer.get(mark);
         if (CollectionUtils.isEmpty(abstractChainHandlers)) {
             throw new RuntimeException(String.format("[%s] Chain of Responsibility ID is undefined.", mark));
         }
-        //然后依次执行里面实现的handler方法
+        // 然后依次执行里面实现的handler方法
         abstractChainHandlers.forEach(each -> each.handler(requestParam));
     }
 
-    //在项目启动的时候执行这个方法
+    // 在项目启动的时候执行这个方法
     @Override
     public void run(String... args) throws Exception {
-        //拿到所有的AbstractChainHandler的bean对象,key为他们的名字
+        // 拿到所有的AbstractChainHandler的bean对象,key为他们的名字
         Map<String, AbstractChainHandler> chainFilterMap = ApplicationContextHolder
                 .getBeansOfType(AbstractChainHandler.class);
-        //然后遍历
+        // 然后遍历
         chainFilterMap.forEach((beanName, bean) -> {
-            //得到这个bean的mark对应的责任链
+            // 得到这个bean的mark对应的责任链
             List<AbstractChainHandler> abstractChainHandlers = abstractChainHandlerContainer.get(bean.mark());
-            //如果为null那么就创建
+            // 如果为null那么就创建
             if (CollectionUtils.isEmpty(abstractChainHandlers)) {
                 abstractChainHandlers = new ArrayList();
             }
-            //添加进去
+            // 添加进去
             abstractChainHandlers.add(bean);
-            //然后根据里面bean的order值排序
+            // 然后根据里面bean的order值排序
             List<AbstractChainHandler> actualAbstractChainHandlers = abstractChainHandlers.stream()
                     .sorted(Comparator.comparing(Ordered::getOrder))
                     .collect(Collectors.toList());
-            //然后放入全局的map中
+            // 然后放入全局的map中
             abstractChainHandlerContainer.put(bean.mark(), actualAbstractChainHandlers);
         });
     }

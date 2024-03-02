@@ -17,7 +17,6 @@
 
 package online.aquan.index12306.framework.starter.web;
 
-
 import online.aquan.index12306.framework.starter.convention.errorcode.BaseErrorCode;
 import online.aquan.index12306.framework.starter.convention.exception.AbstractException;
 import online.aquan.index12306.framework.starter.convention.result.Result;

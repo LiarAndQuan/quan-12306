@@ -1,3 +1,20 @@
+/*
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.
+ * The ASF licenses this file to You under the Apache License, Version 2.0
+ * (the "License"); you may not use this file except in compliance with
+ * the License.  You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package online.aquan.index12306.biz.userservice.controller;
 
 import lombok.RequiredArgsConstructor;
@@ -19,10 +36,9 @@ import java.util.List;
 @RestController
 @RequiredArgsConstructor
 public class PassengerController {
-    
+
     private final PassengerService passengerService;
-    
-    
+
     /**
      * 根据用户名查询乘车人列表
      */
@@ -42,13 +58,7 @@ public class PassengerController {
     /**
      * 新增乘车人
      */
-    @Idempotent(
-            uniqueKeyPrefix = "index12306-user:lock_passenger-alter:",
-            key = "T(online.aquan.index12306.frameworks.starter.user.core.UserContext).getUsername()",
-            type = IdempotentTypeEnum.SPEL,
-            scene = IdempotentSceneEnum.RESTAPI,
-            message = "正在新增乘车人，请稍后再试..."
-    )
+    @Idempotent(uniqueKeyPrefix = "index12306-user:lock_passenger-alter:", key = "T(online.aquan.index12306.frameworks.starter.user.core.UserContext).getUsername()", type = IdempotentTypeEnum.SPEL, scene = IdempotentSceneEnum.RESTAPI, message = "正在新增乘车人，请稍后再试...")
     @PostMapping("/api/user-service/passenger/save")
     public Result<Void> savePassenger(@RequestBody PassengerReqDTO requestParam) {
         passengerService.savePassenger(requestParam);
@@ -58,13 +68,7 @@ public class PassengerController {
     /**
      * 修改乘车人
      */
-    @Idempotent(
-            uniqueKeyPrefix = "index12306-user:lock_passenger-alter:",
-            key = "T(online.aquan.index12306.frameworks.starter.user.core.UserContext).getUsername()",
-            type = IdempotentTypeEnum.SPEL,
-            scene = IdempotentSceneEnum.RESTAPI,
-            message = "正在修改乘车人，请稍后再试..."
-    )
+    @Idempotent(uniqueKeyPrefix = "index12306-user:lock_passenger-alter:", key = "T(online.aquan.index12306.frameworks.starter.user.core.UserContext).getUsername()", type = IdempotentTypeEnum.SPEL, scene = IdempotentSceneEnum.RESTAPI, message = "正在修改乘车人，请稍后再试...")
     @PostMapping("/api/user-service/passenger/update")
     public Result<Void> updatePassenger(@RequestBody PassengerReqDTO requestParam) {
         passengerService.updatePassenger(requestParam);
@@ -74,17 +78,11 @@ public class PassengerController {
     /**
      * 移除乘车人
      */
-    @Idempotent(
-            uniqueKeyPrefix = "index12306-user:lock_passenger-alter:",
-            key = "T(online.aquan.index12306.frameworks.starter.user.core.UserContext).getUsername()",
-            type = IdempotentTypeEnum.SPEL,
-            scene = IdempotentSceneEnum.RESTAPI,
-            message = "正在移除乘车人，请稍后再试..."
-    )
+    @Idempotent(uniqueKeyPrefix = "index12306-user:lock_passenger-alter:", key = "T(online.aquan.index12306.frameworks.starter.user.core.UserContext).getUsername()", type = IdempotentTypeEnum.SPEL, scene = IdempotentSceneEnum.RESTAPI, message = "正在移除乘车人，请稍后再试...")
     @PostMapping("/api/user-service/passenger/remove")
     public Result<Void> removePassenger(@RequestBody PassengerRemoveReqDTO requestParam) {
         passengerService.removePassenger(requestParam);
         return Results.success();
     }
-    
+
 }

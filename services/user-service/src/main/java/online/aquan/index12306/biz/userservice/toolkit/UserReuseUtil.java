@@ -17,7 +17,6 @@
 
 package online.aquan.index12306.biz.userservice.toolkit;
 
-
 import static online.aquan.index12306.biz.userservice.common.constant.Index12306Constant.USER_REGISTER_REUSE_SHARDING_COUNT;
 
 /**

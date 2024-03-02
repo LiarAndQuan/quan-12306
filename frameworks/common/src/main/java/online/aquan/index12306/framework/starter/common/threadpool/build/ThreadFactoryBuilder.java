@@ -17,7 +17,6 @@
 
 package online.aquan.index12306.framework.starter.common.threadpool.build;
 
-
 import online.aquan.index12306.framework.starter.designpattern.builder.Builder;
 
 import java.util.concurrent.Executors;

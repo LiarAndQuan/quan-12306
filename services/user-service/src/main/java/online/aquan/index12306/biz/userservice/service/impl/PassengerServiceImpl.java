@@ -1,3 +1,20 @@
+/*
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.
+ * The ASF licenses this file to You under the Apache License, Version 2.0
+ * (the "License"); you may not use this file except in compliance with
+ * the License.  You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package online.aquan.index12306.biz.userservice.service.impl;
 
 import cn.hutool.core.collection.CollUtil;
@@ -40,10 +57,10 @@ import static online.aquan.index12306.biz.userservice.common.constant.RedisKeyCo
 @Service
 @RequiredArgsConstructor
 public class PassengerServiceImpl implements PassengerService {
+
     private final DistributedCache distributedCache;
     private final PassengerMapper passengerMapper;
     private final PlatformTransactionManager transactionManager;
-    
 
     @Override
     public List<PassengerRespDTO> listPassengerQueryByUsername(String username) {
@@ -55,7 +72,7 @@ public class PassengerServiceImpl implements PassengerService {
     }
 
     private String getActualUserPassengerListStr(String username) {
-        return  distributedCache.safeGet(
+        return distributedCache.safeGet(
                 USER_PASSENGER_LIST + username,
                 String.class,
                 () -> {
@@ -65,8 +82,7 @@ public class PassengerServiceImpl implements PassengerService {
                     return CollUtil.isNotEmpty(passengerDOList) ? JSON.toJSONString(passengerDOList) : null;
                 },
                 1,
-                TimeUnit.DAYS
-        );
+                TimeUnit.DAYS);
     }
 
     @Override
@@ -83,9 +99,9 @@ public class PassengerServiceImpl implements PassengerService {
 
     @Override
     public void savePassenger(PassengerReqDTO requestParam) {
-        //获取到事务对象
+        // 获取到事务对象
         TransactionDefinition transactionDefinition = new DefaultTransactionDefinition();
-        //开启一个新的事务
+        // 开启一个新的事务
         TransactionStatus transactionStatus = transactionManager.getTransaction(transactionDefinition);
         String username = UserContext.getUsername();
         try {
@@ -94,11 +110,11 @@ public class PassengerServiceImpl implements PassengerService {
             passengerDO.setCreateDate(new Date());
             passengerDO.setVerifyStatus(VerifyStatusEnum.REVIEWED.getCode());
             int inserted = passengerMapper.insert(passengerDO);
-            //判断数据库操作是否成功
+            // 判断数据库操作是否成功
             if (!SqlHelper.retBool(inserted)) {
                 throw new ServiceException(String.format("[%s] 新增乘车人失败", username));
             }
-            //成功则提交事务
+            // 成功则提交事务
             transactionManager.commit(transactionStatus);
         } catch (Exception ex) {
             if (ex instanceof ServiceException) {
@@ -106,7 +122,7 @@ public class PassengerServiceImpl implements PassengerService {
             } else {
                 log.error("[{}] 新增乘车人失败，请求参数：{}", username, JSON.toJSONString(requestParam), ex);
             }
-            //失败打印日志并回滚
+            // 失败打印日志并回滚
             transactionManager.rollback(transactionStatus);
             throw ex;
         }
@@ -119,7 +135,7 @@ public class PassengerServiceImpl implements PassengerService {
 
     @Override
     public void updatePassenger(PassengerReqDTO requestParam) {
-        //手动管理事务
+        // 手动管理事务
         TransactionDefinition transactionDefinition = new DefaultTransactionDefinition();
         TransactionStatus transactionStatus = transactionManager.getTransaction(transactionDefinition);
         String username = UserContext.getUsername();

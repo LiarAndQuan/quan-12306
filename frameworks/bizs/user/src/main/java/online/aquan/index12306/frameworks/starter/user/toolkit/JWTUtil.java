@@ -32,7 +32,6 @@ import java.util.Map;
 
 import static online.aquan.index12306.framework.starter.bases.constant.UserConstant.*;
 
-
 /**
  * JWT 工具类
  */

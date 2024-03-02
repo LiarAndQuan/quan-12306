@@ -17,7 +17,6 @@
 
 package online.aquan.index12306.biz.userservice.service.handler.filter.user;
 
-
 import online.aquan.index12306.biz.userservice.common.enums.UserRegisterErrorCodeEnum;
 import online.aquan.index12306.biz.userservice.dto.req.UserRegisterReqDTO;
 import online.aquan.index12306.framework.starter.convention.exception.ClientException;

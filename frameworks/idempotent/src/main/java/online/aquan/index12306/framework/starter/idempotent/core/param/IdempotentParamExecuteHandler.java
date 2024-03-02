@@ -61,7 +61,7 @@ public final class IdempotentParamExecuteHandler extends AbstractIdempotentExecu
      */
     private String getCurrentUserId() {
         String userId = UserContext.getUserId();
-        if(StrUtil.isBlank(userId)){
+        if (StrUtil.isBlank(userId)) {
             throw new ClientException("用户ID获取失败，请登录");
         }
         return userId;

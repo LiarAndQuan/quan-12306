@@ -17,7 +17,6 @@
 
 package online.aquan.index12306.biz.userservice.service.handler.filter.user;
 
-
 import online.aquan.index12306.biz.userservice.common.enums.UserChainMarkEnum;
 import online.aquan.index12306.biz.userservice.dto.req.UserRegisterReqDTO;
 import online.aquan.index12306.framework.starter.designpattern.chain.AbstractChainHandler;
@@ -28,8 +27,8 @@ import online.aquan.index12306.framework.starter.designpattern.chain.AbstractCha
  */
 public interface UserRegisterCreateChainFilter<T extends UserRegisterReqDTO> extends AbstractChainHandler<UserRegisterReqDTO> {
 
-    //抽象出来一个业务线类管理这一条责任链,这里实现了mark接口,子类就可以不用实现了
-    //子类只需要实现order和handler接口就好了
+    // 抽象出来一个业务线类管理这一条责任链,这里实现了mark接口,子类就可以不用实现了
+    // 子类只需要实现order和handler接口就好了
     @Override
     default String mark() {
         return UserChainMarkEnum.USER_REGISTER_FILTER.name();

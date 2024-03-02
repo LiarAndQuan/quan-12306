@@ -24,7 +24,6 @@ import org.springframework.context.annotation.Bean;
 
 import static online.aquan.index12306.framework.starter.bases.constant.FilterOrderConstant.USER_TRANSMIT_FILTER_ORDER;
 
-
 /**
  * 用户配置自动装配
  */

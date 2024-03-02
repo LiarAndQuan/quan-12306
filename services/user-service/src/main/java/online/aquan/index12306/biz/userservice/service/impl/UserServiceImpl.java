@@ -1,3 +1,20 @@
+/*
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.
+ * The ASF licenses this file to You under the Apache License, Version 2.0
+ * (the "License"); you may not use this file except in compliance with
+ * the License.  You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package online.aquan.index12306.biz.userservice.service.impl;
 
 import cn.hutool.core.util.StrUtil;
@@ -25,6 +42,7 @@ import java.util.Optional;
 @RequiredArgsConstructor
 @Service
 public class UserServiceImpl implements UserService {
+
     private final UserMapper userMapper;
     private final UserDeletionMapper userDeletionMapper;
     private final UserMailMapper userMailMapper;
@@ -49,19 +67,19 @@ public class UserServiceImpl implements UserService {
                 .eq(UserDeletionDO::getIdType, idType)
                 .eq(UserDeletionDO::getIdCard, idCard);
         // TODO 此处应该先查缓存
-        //返回记录的条数
+        // 返回记录的条数
         Long deletionCount = userDeletionMapper.selectCount(queryWrapper);
         return Optional.ofNullable(deletionCount).map(Long::intValue).orElse(0);
     }
 
     @Override
     public void update(UserUpdateReqDTO requestParam) {
-        //转化为UserDO对象直接更新
+        // 转化为UserDO对象直接更新
         UserDO userDO = BeanUtil.convert(requestParam, UserDO.class);
         LambdaUpdateWrapper<UserDO> userUpdateWrapper = Wrappers.lambdaUpdate(UserDO.class)
                 .eq(UserDO::getUsername, requestParam.getUsername());
         userMapper.update(userDO, userUpdateWrapper);
-        //如果传入的邮箱与之前的邮箱不同,那么需要修改mail路由表
+        // 如果传入的邮箱与之前的邮箱不同,那么需要修改mail路由表
         UserQueryRespDTO userQueryRespDTO = queryUserByUsername(requestParam.getUsername());
         if (StrUtil.isNotBlank(requestParam.getMail()) && !Objects.equals(requestParam.getMail(), userQueryRespDTO.getMail())) {
             LambdaUpdateWrapper<UserMailDO> updateWrapper = Wrappers.lambdaUpdate(UserMailDO.class)
