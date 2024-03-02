@@ -31,4 +31,11 @@ public class TicketOrderController {
     public Result<Boolean> closeTickOrder(@RequestBody CancelTicketOrderReqDTO requestParam) {
         return Results.success(orderService.closeTickOrder(requestParam));
     }
+    /**
+     * 车票订单取消
+     */
+    @PostMapping("/api/order-service/order/ticket/cancel")
+    public Result<Boolean> cancelTickOrder(@RequestBody CancelTicketOrderReqDTO requestParam) {
+        return Results.success(orderService.cancelTickOrder(requestParam));
+    }
 }
