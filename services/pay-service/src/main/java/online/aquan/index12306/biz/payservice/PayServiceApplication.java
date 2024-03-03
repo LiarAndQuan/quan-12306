@@ -15,12 +15,14 @@
  * limitations under the License.
  */
 
-package online.aquan.index12306.index12306payservice;
+package online.aquan.index12306.biz.payservice;
 
+import org.mybatis.spring.annotation.MapperScan;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 @SpringBootApplication
+@MapperScan("online.aquan.index12306.biz.payservice.dao.mapper")
 public class PayServiceApplication {
 
     public static void main(String[] args) {
