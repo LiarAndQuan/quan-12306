@@ -99,4 +99,13 @@ public class RedisKeyConstant {
      */
     public static final String TRAIN_STATION_CARRIAGE_REMAINING_TICKET = "index12306-ticket-service:train_station_carriage_remaining_ticket:";
 
+    /**
+     * 列车购买令牌桶，Key Prefix + 列车ID
+     */
+    public static final String TICKET_AVAILABILITY_TOKEN_BUCKET = "index12306-ticket-service:ticket_availability_token_bucket:";
+
+    /**
+     * 列车购买令牌桶加载数据 Key
+     */
+    public static final String LOCK_TICKET_AVAILABILITY_TOKEN_BUCKET = "index12306-ticket-service:lock:ticket_availability_token_bucket:%s";
 }

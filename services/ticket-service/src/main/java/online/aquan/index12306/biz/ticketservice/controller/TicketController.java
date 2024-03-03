@@ -18,6 +18,7 @@
 package online.aquan.index12306.biz.ticketservice.controller;
 
 import lombok.RequiredArgsConstructor;
+import online.aquan.index12306.biz.ticketservice.dto.req.CancelTicketOrderReqDTO;
 import online.aquan.index12306.biz.ticketservice.dto.req.PurchaseTicketReqDTO;
 import online.aquan.index12306.biz.ticketservice.dto.req.TicketPageQueryReqDTO;
 import online.aquan.index12306.biz.ticketservice.dto.resp.TicketPageQueryRespDTO;
@@ -58,6 +59,17 @@ public class TicketController {
     @PostMapping("/api/ticket-service/ticket/purchase")
     public Result<TicketPurchaseRespDTO> purchaseTickets(@RequestBody PurchaseTicketReqDTO requestParam) {
         return Results.success(ticketService.purchaseTicketsV1(requestParam));
+    }
+    //todo 购买车票v2
+
+    /**
+     * 取消车票订单
+     */
+    @ILog
+    @PostMapping("/api/ticket-service/ticket/cancel")
+    public Result<Void> cancelTicketOrder(@RequestBody CancelTicketOrderReqDTO requestParam) {
+        ticketService.cancelTicketOrder(requestParam);
+        return Results.success();
     }
 
 }

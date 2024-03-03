@@ -32,8 +32,10 @@ import online.aquan.index12306.biz.ticketservice.common.enums.TicketChainMarkEnu
 import online.aquan.index12306.biz.ticketservice.common.enums.TicketStatusEnum;
 import online.aquan.index12306.biz.ticketservice.dao.entity.*;
 import online.aquan.index12306.biz.ticketservice.dao.mapper.*;
+import online.aquan.index12306.biz.ticketservice.dto.domain.RouteDTO;
 import online.aquan.index12306.biz.ticketservice.dto.domain.SeatClassDTO;
 import online.aquan.index12306.biz.ticketservice.dto.domain.TicketListDTO;
+import online.aquan.index12306.biz.ticketservice.dto.req.CancelTicketOrderReqDTO;
 import online.aquan.index12306.biz.ticketservice.dto.req.PurchaseTicketReqDTO;
 import online.aquan.index12306.biz.ticketservice.dto.req.TicketPageQueryReqDTO;
 import online.aquan.index12306.biz.ticketservice.dto.resp.TicketOrderDetailRespDTO;
@@ -42,20 +44,26 @@ import online.aquan.index12306.biz.ticketservice.dto.resp.TicketPurchaseRespDTO;
 import online.aquan.index12306.biz.ticketservice.remote.TicketOrderRemoteService;
 import online.aquan.index12306.biz.ticketservice.remote.dto.TicketOrderCreateRemoteReqDTO;
 import online.aquan.index12306.biz.ticketservice.remote.dto.TicketOrderItemCreateRemoteReqDTO;
+import online.aquan.index12306.biz.ticketservice.remote.dto.TicketOrderPassengerDetailRespDTO;
+import online.aquan.index12306.biz.ticketservice.service.SeatService;
 import online.aquan.index12306.biz.ticketservice.service.TicketService;
+import online.aquan.index12306.biz.ticketservice.service.TrainStationService;
 import online.aquan.index12306.biz.ticketservice.service.cache.SeatMarginCacheLoader;
 import online.aquan.index12306.biz.ticketservice.service.handler.ticket.dto.TrainPurchaseTicketRespDTO;
 import online.aquan.index12306.biz.ticketservice.service.handler.ticket.select.TrainSeatTypeSelector;
+import online.aquan.index12306.biz.ticketservice.service.handler.ticket.tokenbucket.TicketAvailabilityTokenBucket;
 import online.aquan.index12306.biz.ticketservice.toolkit.DateUtil;
 import online.aquan.index12306.biz.ticketservice.toolkit.TimeStringComparator;
 import online.aquan.index12306.framework.starter.cache.DistributedCache;
 import online.aquan.index12306.framework.starter.cache.toolkit.CacheUtil;
+import online.aquan.index12306.framework.starter.common.toolkit.BeanUtil;
 import online.aquan.index12306.framework.starter.convention.exception.ServiceException;
 import online.aquan.index12306.framework.starter.convention.result.Result;
 import online.aquan.index12306.framework.starter.designpattern.chain.AbstractChainContext;
 import online.aquan.index12306.frameworks.starter.user.core.UserContext;
 import org.redisson.api.RLock;
 import org.redisson.api.RedissonClient;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.env.ConfigurableEnvironment;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
@@ -89,6 +97,12 @@ public class TicketServiceImpl extends ServiceImpl<TicketMapper, TicketDO> imple
     private final TicketService ticketService;
     private final TrainSeatTypeSelector trainSeatTypeSelector;
     private final TicketOrderRemoteService ticketOrderRemoteService;
+    private final SeatService seatService;
+    private final TrainStationService trainStationService;
+    private final TicketAvailabilityTokenBucket ticketAvailabilityTokenBucket;
+
+    @Value("${ticket.availability.cache-update.type:}")
+    private String ticketAvailabilityCacheUpdateType;
 
     @Override
     public TicketPageQueryRespDTO pageListTicketQueryV1(TicketPageQueryReqDTO requestParam) {
@@ -377,4 +391,49 @@ public class TicketServiceImpl extends ServiceImpl<TicketMapper, TicketDO> imple
         return new TicketPurchaseRespDTO(ticketOrderResult.getData(), ticketOrderDetailResults);
     }
 
+    @Override
+    public void cancelTicketOrder(CancelTicketOrderReqDTO requestParam) {
+        //调用远程服务取消这个订单
+        Result<Void> cancelOrderResult = ticketOrderRemoteService.cancelTicketOrder(requestParam);
+        //如果取消成功,并且ticket cache update的类型不等于binlog
+        if (cancelOrderResult.isSuccess() && !StrUtil.equals(ticketAvailabilityCacheUpdateType, "binlog")) {
+            //根据订单号查询一下这个订单详情
+            Result<online.aquan.index12306.biz.ticketservice.remote.dto.TicketOrderDetailRespDTO> ticketOrderDetailResult = ticketOrderRemoteService.queryTicketOrderByOrderSn(requestParam.getOrderSn());
+            online.aquan.index12306.biz.ticketservice.remote.dto.TicketOrderDetailRespDTO ticketOrderDetail = ticketOrderDetailResult.getData();
+            String trainId = String.valueOf(ticketOrderDetail.getTrainId());
+            String departure = ticketOrderDetail.getDeparture();
+            String arrival = ticketOrderDetail.getArrival();
+            List<TicketOrderPassengerDetailRespDTO> trainPurchaseTicketResults = ticketOrderDetail.getPassengerDetails();
+            try {
+                //解锁沿途的城市的对应的购票时候被锁定的票
+                seatService.unlock(trainId, departure, arrival, BeanUtil.convert(trainPurchaseTicketResults, TrainPurchaseTicketRespDTO.class));
+            } catch (Throwable ex) {
+                log.error("[取消订单] 订单号：{} 回滚列车DB座位状态失败", requestParam.getOrderSn(), ex);
+                throw ex;
+            }
+            //回滚列车余量令牌，一般为订单取消或长时间未支付触发
+            ticketAvailabilityTokenBucket.rollbackInBucket(ticketOrderDetail);
+            try {
+                StringRedisTemplate stringRedisTemplate = (StringRedisTemplate) distributedCache.getInstance();
+                //根据座位类型来进行分组
+                Map<Integer, List<TicketOrderPassengerDetailRespDTO>> seatTypeMap = trainPurchaseTicketResults.stream()
+                        .collect(Collectors.groupingBy(TicketOrderPassengerDetailRespDTO::getSeatType));
+                //获取需列车站点扣减路线关系
+                //获取开始站点和目的站点、中间站点以及关联站点信息
+                List<RouteDTO> routeDTOList = trainStationService.listTakeoutTrainStationRoute(trainId, departure, arrival);
+                routeDTOList.forEach(each -> {
+                    //获取余票的key
+                    String keySuffix = StrUtil.join("_", trainId, each.getStartStation(), each.getEndStation());
+                    //对于每种座位类型,都增加对应数量的余量
+                    seatTypeMap.forEach((seatType, ticketOrderPassengerDetailRespDTOList) -> {
+                        stringRedisTemplate.opsForHash()
+                                .increment(TRAIN_STATION_REMAINING_TICKET + keySuffix, String.valueOf(seatType), ticketOrderPassengerDetailRespDTOList.size());
+                    });
+                });
+            } catch (Throwable ex) {
+                log.error("[取消关闭订单] 订单号：{} 回滚列车Cache余票失败", requestParam.getOrderSn(), ex);
+                throw ex;
+            }
+        }
+    }
 }
