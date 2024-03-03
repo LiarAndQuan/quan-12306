@@ -23,6 +23,7 @@ import online.aquan.index12306.biz.ticketservice.dto.req.PurchaseTicketReqDTO;
 import online.aquan.index12306.biz.ticketservice.dto.req.TicketPageQueryReqDTO;
 import online.aquan.index12306.biz.ticketservice.dto.resp.TicketPageQueryRespDTO;
 import online.aquan.index12306.biz.ticketservice.dto.resp.TicketPurchaseRespDTO;
+import online.aquan.index12306.biz.ticketservice.remote.dto.PayInfoRespDTO;
 import online.aquan.index12306.biz.ticketservice.service.TicketService;
 import online.aquan.index12306.framework.starter.convention.result.Result;
 import online.aquan.index12306.framework.starter.idempotent.annotation.Idempotent;
@@ -30,10 +31,7 @@ import online.aquan.index12306.framework.starter.idempotent.enums.IdempotentScen
 import online.aquan.index12306.framework.starter.idempotent.enums.IdempotentTypeEnum;
 import online.aquan.index12306.framework.starter.log.annotation.ILog;
 import online.aquan.index12306.framework.starter.web.Results;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequiredArgsConstructor
@@ -70,6 +68,14 @@ public class TicketController {
     public Result<Void> cancelTicketOrder(@RequestBody CancelTicketOrderReqDTO requestParam) {
         ticketService.cancelTicketOrder(requestParam);
         return Results.success();
+    }
+
+    /**
+     * 支付单详情查询
+     */
+    @GetMapping("/api/ticket-service/ticket/pay/query")
+    public Result<PayInfoRespDTO> getPayInfo(@RequestParam(value = "orderSn") String orderSn) {
+        return Results.success(ticketService.getPayInfo(orderSn));
     }
 
 }

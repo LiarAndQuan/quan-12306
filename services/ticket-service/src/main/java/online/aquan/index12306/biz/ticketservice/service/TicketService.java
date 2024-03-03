@@ -24,6 +24,7 @@ import online.aquan.index12306.biz.ticketservice.dto.req.PurchaseTicketReqDTO;
 import online.aquan.index12306.biz.ticketservice.dto.req.TicketPageQueryReqDTO;
 import online.aquan.index12306.biz.ticketservice.dto.resp.TicketPageQueryRespDTO;
 import online.aquan.index12306.biz.ticketservice.dto.resp.TicketPurchaseRespDTO;
+import online.aquan.index12306.biz.ticketservice.remote.dto.PayInfoRespDTO;
 import org.springframework.web.bind.annotation.RequestBody;
 
 public interface TicketService extends IService<TicketDO> {
@@ -59,5 +60,14 @@ public interface TicketService extends IService<TicketDO> {
      * @param requestParam 取消车票订单入参
      */
     void cancelTicketOrder(CancelTicketOrderReqDTO requestParam);
+
+
+    /**
+     * 支付单详情查询
+     *
+     * @param orderSn 订单号
+     * @return 支付单详情
+     */
+    PayInfoRespDTO getPayInfo(String orderSn);
 
 }

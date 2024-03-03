@@ -41,7 +41,9 @@ import online.aquan.index12306.biz.ticketservice.dto.req.TicketPageQueryReqDTO;
 import online.aquan.index12306.biz.ticketservice.dto.resp.TicketOrderDetailRespDTO;
 import online.aquan.index12306.biz.ticketservice.dto.resp.TicketPageQueryRespDTO;
 import online.aquan.index12306.biz.ticketservice.dto.resp.TicketPurchaseRespDTO;
+import online.aquan.index12306.biz.ticketservice.remote.PayRemoteService;
 import online.aquan.index12306.biz.ticketservice.remote.TicketOrderRemoteService;
+import online.aquan.index12306.biz.ticketservice.remote.dto.PayInfoRespDTO;
 import online.aquan.index12306.biz.ticketservice.remote.dto.TicketOrderCreateRemoteReqDTO;
 import online.aquan.index12306.biz.ticketservice.remote.dto.TicketOrderItemCreateRemoteReqDTO;
 import online.aquan.index12306.biz.ticketservice.remote.dto.TicketOrderPassengerDetailRespDTO;
@@ -100,6 +102,7 @@ public class TicketServiceImpl extends ServiceImpl<TicketMapper, TicketDO> imple
     private final SeatService seatService;
     private final TrainStationService trainStationService;
     private final TicketAvailabilityTokenBucket ticketAvailabilityTokenBucket;
+    private final PayRemoteService payRemoteService;
 
     @Value("${ticket.availability.cache-update.type:}")
     private String ticketAvailabilityCacheUpdateType;
@@ -436,4 +439,10 @@ public class TicketServiceImpl extends ServiceImpl<TicketMapper, TicketDO> imple
             }
         }
     }
+
+    @Override
+    public PayInfoRespDTO getPayInfo(String orderSn) {
+        return payRemoteService.getPayInfo(orderSn).getData();
+    }
+
 }
