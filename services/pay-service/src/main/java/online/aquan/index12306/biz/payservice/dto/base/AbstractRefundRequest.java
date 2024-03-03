@@ -15,20 +15,45 @@
  * limitations under the License.
  */
 
-package online.aquan.index12306.biz.payservice;
+package online.aquan.index12306.biz.payservice.dto.base;
 
-import org.mybatis.spring.annotation.MapperScan;
-import org.springframework.boot.SpringApplication;
-import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.cloud.openfeign.EnableFeignClients;
+import lombok.Getter;
+import lombok.Setter;
 
-@SpringBootApplication
-@MapperScan("online.aquan.index12306.biz.payservice.dao.mapper")
-@EnableFeignClients("online.aquan.index12306.biz.payservice.remote")
-public class PayServiceApplication {
+/**
+ * 抽象退款入参实体
+ *
+ */
+public abstract class AbstractRefundRequest implements RefundRequest {
 
-    public static void main(String[] args) {
-        SpringApplication.run(PayServiceApplication.class, args);
+    /**
+     * 交易环境，H5、小程序、网站等
+     */
+    @Getter
+    @Setter
+    private Integer tradeType;
+
+    /**
+     * 订单号
+     */
+    @Getter
+    @Setter
+    private String orderSn;
+
+    /**
+     * 支付渠道
+     */
+    @Getter
+    @Setter
+    private Integer channel;
+
+    @Override
+    public AliRefundRequest getAliRefundRequest() {
+        return null;
     }
 
+    @Override
+    public String buildMark() {
+        return null;
+    }
 }

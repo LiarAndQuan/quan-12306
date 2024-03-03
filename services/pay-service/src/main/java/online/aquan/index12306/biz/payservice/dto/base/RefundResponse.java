@@ -15,20 +15,30 @@
  * limitations under the License.
  */
 
-package online.aquan.index12306.biz.payservice;
+package online.aquan.index12306.biz.payservice.dto.base;
 
-import org.mybatis.spring.annotation.MapperScan;
-import org.springframework.boot.SpringApplication;
-import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.cloud.openfeign.EnableFeignClients;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
-@SpringBootApplication
-@MapperScan("online.aquan.index12306.biz.payservice.dao.mapper")
-@EnableFeignClients("online.aquan.index12306.biz.payservice.remote")
-public class PayServiceApplication {
+/**
+ * 退款返回
+ *
+ */
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
+public final class RefundResponse {
 
-    public static void main(String[] args) {
-        SpringApplication.run(PayServiceApplication.class, args);
-    }
+    /**
+     * 退款状态
+     */
+    private Integer status;
 
+    /**
+     * 第三方交易凭证
+     */
+    private String tradeNo;
 }

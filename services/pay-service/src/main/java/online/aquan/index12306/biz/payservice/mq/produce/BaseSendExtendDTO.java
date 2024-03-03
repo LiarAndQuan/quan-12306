@@ -15,20 +15,45 @@
  * limitations under the License.
  */
 
-package online.aquan.index12306.biz.payservice;
+package online.aquan.index12306.biz.payservice.mq.produce;
 
-import org.mybatis.spring.annotation.MapperScan;
-import org.springframework.boot.SpringApplication;
-import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.cloud.openfeign.EnableFeignClients;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
-@SpringBootApplication
-@MapperScan("online.aquan.index12306.biz.payservice.dao.mapper")
-@EnableFeignClients("online.aquan.index12306.biz.payservice.remote")
-public class PayServiceApplication {
+/**
+ * 消息发送事件基础扩充属性实体
+ *
+ */
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
+public final class BaseSendExtendDTO {
 
-    public static void main(String[] args) {
-        SpringApplication.run(PayServiceApplication.class, args);
-    }
+    /**
+     * 事件名称
+     */
+    private String eventName;
 
+    /**
+     * 主题
+     */
+    private String topic;
+
+    /**
+     * 标签
+     */
+    private String tag;
+
+    /**
+     * 业务标识
+     */
+    private String keys;
+
+    /**
+     * 发送消息超时时间
+     */
+    private Long sentTimeout;
 }

@@ -15,20 +15,34 @@
  * limitations under the License.
  */
 
-package online.aquan.index12306.biz.payservice;
+package online.aquan.index12306.biz.payservice.common.enums;
 
-import org.mybatis.spring.annotation.MapperScan;
-import org.springframework.boot.SpringApplication;
-import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.cloud.openfeign.EnableFeignClients;
+import lombok.Getter;
+import lombok.RequiredArgsConstructor;
 
-@SpringBootApplication
-@MapperScan("online.aquan.index12306.biz.payservice.dao.mapper")
-@EnableFeignClients("online.aquan.index12306.biz.payservice.remote")
-public class PayServiceApplication {
+/**
+ * 退款类型枚举
+ *
+ */
+@Getter
+@RequiredArgsConstructor
+public enum RefundTypeEnum {
 
-    public static void main(String[] args) {
-        SpringApplication.run(PayServiceApplication.class, args);
-    }
+    /**
+     * 部分退款
+     */
+    PARTIAL_REFUND(11, 0, "PARTIAL_REFUND", "部分退款"),
 
+    /**
+     * 全部退款
+     */
+    FULL_REFUND(12, 1, "FULL_REFUND", "全部退款");
+
+    private final Integer code;
+
+    private final Integer type;
+
+    private final String name;
+
+    private final String value;
 }

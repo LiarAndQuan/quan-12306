@@ -15,20 +15,26 @@
  * limitations under the License.
  */
 
-package online.aquan.index12306.biz.payservice;
+package online.aquan.index12306.biz.payservice.dto.base;
 
-import org.mybatis.spring.annotation.MapperScan;
-import org.springframework.boot.SpringApplication;
-import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.cloud.openfeign.EnableFeignClients;
+/**
+ * 退款入参接口
+ *
+ */
+public interface RefundRequest {
 
-@SpringBootApplication
-@MapperScan("online.aquan.index12306.biz.payservice.dao.mapper")
-@EnableFeignClients("online.aquan.index12306.biz.payservice.remote")
-public class PayServiceApplication {
+    /**
+     * 获取阿里退款入参
+     */
+    AliRefundRequest getAliRefundRequest();
 
-    public static void main(String[] args) {
-        SpringApplication.run(PayServiceApplication.class, args);
-    }
+    /**
+     * 获取订单号
+     */
+    String getOrderSn();
 
+    /**
+     * 构建查找支付策略实现类标识
+     */
+    String buildMark();
 }

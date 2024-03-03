@@ -15,20 +15,27 @@
  * limitations under the License.
  */
 
-package online.aquan.index12306.biz.payservice;
+package online.aquan.index12306.biz.payservice.dto;
 
-import org.mybatis.spring.annotation.MapperScan;
-import org.springframework.boot.SpringApplication;
-import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.cloud.openfeign.EnableFeignClients;
+import lombok.Data;
+import online.aquan.index12306.biz.payservice.dto.base.AbstractRefundRequest;
 
-@SpringBootApplication
-@MapperScan("online.aquan.index12306.biz.payservice.dao.mapper")
-@EnableFeignClients("online.aquan.index12306.biz.payservice.remote")
-public class PayServiceApplication {
+import java.math.BigDecimal;
 
-    public static void main(String[] args) {
-        SpringApplication.run(PayServiceApplication.class, args);
-    }
+/**
+ * 退款请求命令
+ *
+ */
+@Data
+public final class RefundCommand extends AbstractRefundRequest {
 
+    /**
+     * 支付金额
+     */
+    private BigDecimal payAmount;
+
+    /**
+     * 交易凭证号
+     */
+    private String tradeNo;
 }
