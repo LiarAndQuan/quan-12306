@@ -29,8 +29,14 @@ import java.util.Map;
  */
 public class ApplicationContextHolder implements ApplicationContextAware {
 
+  
     private static ApplicationContext CONTEXT;
 
+    /*
+    ApplicationContextAware 是 Spring 框架中的一个接口，用于获取 Spring 应用上下文（ApplicationContext）。
+    当一个类实现了 ApplicationContextAware 接口，并且注册为 Spring Bean，Spring 在实例化这个 Bean 时会调用 setApplicationContext 方法，
+    并将应用上下文作为参数传入，从而允许这个 Bean 访问应用上下文中的各种组件
+    */
     @Override
     public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
         ApplicationContextHolder.CONTEXT = applicationContext;
