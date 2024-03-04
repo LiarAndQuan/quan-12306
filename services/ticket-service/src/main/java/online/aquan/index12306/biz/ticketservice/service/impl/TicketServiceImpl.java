@@ -24,6 +24,8 @@ import com.alibaba.fastjson2.JSON;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.github.benmanes.caffeine.cache.Cache;
+import com.github.benmanes.caffeine.cache.Caffeine;
 import com.google.common.collect.Lists;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -32,6 +34,7 @@ import online.aquan.index12306.biz.ticketservice.common.enums.TicketChainMarkEnu
 import online.aquan.index12306.biz.ticketservice.common.enums.TicketStatusEnum;
 import online.aquan.index12306.biz.ticketservice.dao.entity.*;
 import online.aquan.index12306.biz.ticketservice.dao.mapper.*;
+import online.aquan.index12306.biz.ticketservice.dto.domain.PurchaseTicketPassengerDetailDTO;
 import online.aquan.index12306.biz.ticketservice.dto.domain.RouteDTO;
 import online.aquan.index12306.biz.ticketservice.dto.domain.SeatClassDTO;
 import online.aquan.index12306.biz.ticketservice.dto.domain.TicketListDTO;
@@ -75,6 +78,7 @@ import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.locks.ReentrantLock;
 import java.util.stream.Collectors;
 
 import static online.aquan.index12306.biz.ticketservice.common.constant.Index12306Constant.ADVANCE_TICKET_DAY;
@@ -96,7 +100,7 @@ public class TicketServiceImpl extends ServiceImpl<TicketMapper, TicketDO> imple
     private final SeatMarginCacheLoader seatMarginCacheLoader;
     private final AbstractChainContext<PurchaseTicketReqDTO> purchaseTicketAbstractChainContext;
     private final ConfigurableEnvironment environment;
-    private final TicketService ticketService;
+ 
     private final TrainSeatTypeSelector trainSeatTypeSelector;
     private final TicketOrderRemoteService ticketOrderRemoteService;
     private final SeatService seatService;
@@ -293,9 +297,79 @@ public class TicketServiceImpl extends ServiceImpl<TicketMapper, TicketDO> imple
         lock.lock();
         try {
             // 为什么自己调内部接口还要ticketService?
-            return ticketService.executePurchaseTickets(requestParam);
+            return executePurchaseTickets(requestParam);
         } finally {
             lock.unlock();
+        }
+    }
+
+    /*
+    * Caffeine 是一个 Java 缓存库，用于在应用程序中实现高效的内存缓存。
+    * 它提供了一个功能强大而高性能的缓存实现，可以用于缓存各种类型的数据，如对象、方法调用的结果等。
+    * */
+    private final Cache<String, ReentrantLock> localLockMap = Caffeine.newBuilder()
+            .expireAfterWrite(1, TimeUnit.DAYS)
+            .build();
+    @Override
+    public TicketPurchaseRespDTO purchaseTicketsV2(PurchaseTicketReqDTO requestParam) {
+        // 责任链模式，验证 1：参数必填 2：参数正确性 3：乘客是否已买当前车次等...
+        purchaseTicketAbstractChainContext.handler(TicketChainMarkEnum.TRAIN_PURCHASE_TICKET_FILTER.name(), requestParam);
+        boolean tokenResult = ticketAvailabilityTokenBucket.takeTokenFromBucket(requestParam);
+        if (!tokenResult) {
+            throw new ServiceException("列车站点已无余票");
+        }
+        // v1 版本购票存在 4 个较为严重的问题，v2 版本相比较 v1 版本更具有业务特点以及性能，整体提升较大
+        // 写了详细的 v2 版本购票升级指南，欢迎查阅 https://nageoffer.com/12306/question
+        List<ReentrantLock> localLockList = new ArrayList<>();
+        List<RLock> distributedLockList = new ArrayList<>();
+        //根据座位类型分类
+        Map<Integer, List<PurchaseTicketPassengerDetailDTO>> seatTypeMap = requestParam.getPassengers().stream()
+                .collect(Collectors.groupingBy(PurchaseTicketPassengerDetailDTO::getSeatType));
+        seatTypeMap.forEach((searType, count) -> {
+            //key=train id + seat type
+            String lockKey = environment.resolvePlaceholders(String.format(LOCK_PURCHASE_TICKETS_V2, requestParam.getTrainId(), searType));
+            /*  ReentrantLock 的名称 "Reentrant" 指的是它是可重入的。可重入性是指同一线程可以多次获得同一把锁而不会产生死锁。
+             当一个线程已经获得了锁时，它可以继续多次获得该锁而不被阻塞，而其他线程在获取该锁时会被阻塞。*/
+            //从java缓存中获取锁
+            ReentrantLock localLock = localLockMap.getIfPresent(lockKey);
+            //如果没有
+            if (localLock == null) {
+                //那么在创建锁之前先锁住
+                synchronized (TicketService.class) {
+                    //双重判定
+                    if ((localLock = localLockMap.getIfPresent(lockKey)) == null) {
+                        //这里才创建
+                        localLock = new ReentrantLock(true);
+                        localLockMap.put(lockKey, localLock);
+                    }
+                }
+            }
+            //加入到本地锁列表
+            localLockList.add(localLock);
+            //获取分布式锁
+            RLock distributedLock = redissonClient.getFairLock(lockKey);
+            //加入分布式锁列表
+            distributedLockList.add(distributedLock);
+        });
+        try {
+            localLockList.forEach(ReentrantLock::lock);
+            distributedLockList.forEach(RLock::lock);
+            //用所有的本地锁和分布式锁都锁住,然后就可以执行购票了
+            return executePurchaseTickets(requestParam);
+        } finally {
+            //最后解锁即可
+            localLockList.forEach(localLock -> {
+                try {
+                    localLock.unlock();
+                } catch (Throwable ignored) {
+                }
+            });
+            distributedLockList.forEach(distributedLock -> {
+                try {
+                    distributedLock.unlock();
+                } catch (Throwable ignored) {
+                }
+            });
         }
     }
 

@@ -51,14 +51,31 @@ public class TicketController {
      * 购买车票
      */
     @ILog
-    @Idempotent(uniqueKeyPrefix = "index12306-ticket:lock_purchase-tickets:", key = "T(online. aquan.index12306.framework.starter.bases.ApplicationContextHolder).getBean('environment').getProperty('unique-name', '')"
+    @Idempotent(uniqueKeyPrefix = "index12306-ticket:lock_purchase-tickets:", key = "T(online.aquan.index12306.framework.starter.bases.ApplicationContextHolder).getBean('environment').getProperty('unique-name', '')"
             + "+'_'+"
             + "T(online.aquan.index12306.frameworks.starter.user.core.UserContext).getUsername()", message = "正在执行下单流程，请稍后...", scene = IdempotentSceneEnum.RESTAPI, type = IdempotentTypeEnum.SPEL)
     @PostMapping("/api/ticket-service/ticket/purchase")
     public Result<TicketPurchaseRespDTO> purchaseTickets(@RequestBody PurchaseTicketReqDTO requestParam) {
         return Results.success(ticketService.purchaseTicketsV1(requestParam));
     }
-    //todo 购买车票v2
+
+    /**
+     * 购买车票v2
+     */
+    @ILog
+    @Idempotent(
+            uniqueKeyPrefix = "index12306-ticket:lock_purchase-tickets:",
+            key = "T(online.aquan.index12306.framework.starter.bases.ApplicationContextHolder).getBean('environment').getProperty('unique-name', '')"
+                  + "+'_'+"
+                  + "T(online.aquan.index12306.frameworks.starter.user.core.UserContext).getUsername()",
+            message = "正在执行下单流程，请稍后...",
+            scene = IdempotentSceneEnum.RESTAPI,
+            type = IdempotentTypeEnum.SPEL
+    )
+    @PostMapping("/api/ticket-service/ticket/purchase/v2")
+    public Result<TicketPurchaseRespDTO> purchaseTicketsV2(@RequestBody PurchaseTicketReqDTO requestParam) {
+        return Results.success(ticketService.purchaseTicketsV2(requestParam));
+    }
 
     /**
      * 取消车票订单
