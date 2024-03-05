@@ -108,4 +108,10 @@ public class RedisKeyConstant {
      * 列车购买令牌桶加载数据 Key
      */
     public static final String LOCK_TICKET_AVAILABILITY_TOKEN_BUCKET = "index12306-ticket-service:lock:ticket_availability_token_bucket:%s";
+
+    /**
+     * 用户购票分布式锁 Key v2
+     */
+    public static final String LOCK_PURCHASE_TICKETS_V2 = "${unique-name:}index12306-ticket-service:lock:purchase_tickets_%s_%d";
+
 }
