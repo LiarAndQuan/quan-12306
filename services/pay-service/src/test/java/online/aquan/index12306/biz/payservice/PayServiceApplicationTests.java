@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-package online.aquan.index12306.index12306payservice;
+package online.aquan.index12306.biz.payservice;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;

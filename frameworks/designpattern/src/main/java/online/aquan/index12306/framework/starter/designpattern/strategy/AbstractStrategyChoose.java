@@ -46,6 +46,9 @@ public class AbstractStrategyChoose implements ApplicationListener<ApplicationIn
      * @return 实际执行策略
      */
     public AbstractExecuteStrategy choose(String mark, Boolean predicateFlag) {
+        //如果传入了predicateFlag,那么说明这个策略就需要通过正则表达式去匹配
+        //先过滤出真正实现了patternMatchMark的策略
+        //然后用这个正则表达式去匹配传入的mark
         if (predicateFlag != null && predicateFlag) {
             return abstractExecuteStrategyMap.values().stream()
                     .filter(each -> StringUtils.hasText(each.patternMatchMark()))

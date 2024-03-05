@@ -314,7 +314,7 @@ public class OrderServiceImpl implements OrderService {
 
     @Override
     public void payCallbackOrder(PayResultCallbackOrderEvent requestParam) {
-        //设置支付时间和支付类型
+        //设置支付时间和支付渠道
         OrderDO updateOrderDO = new OrderDO();
         updateOrderDO.setPayTime(requestParam.getGmtPayment());
         updateOrderDO.setPayType(requestParam.getChannel());

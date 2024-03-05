@@ -50,7 +50,7 @@ public class RefundServiceImpl implements RefundService {
     @Transactional
     public RefundRespDTO commonRefund(RefundReqDTO requestParam) {
         RefundRespDTO refundRespDTO = null;
-        //查询一下这个订单是否存在
+        //查询一下这个支付单是否存在
         LambdaQueryWrapper<PayDO> queryWrapper = Wrappers.lambdaQuery(PayDO.class)
                 .eq(PayDO::getOrderSn, requestParam.getOrderSn());
         PayDO payDO = payMapper.selectOne(queryWrapper);
@@ -60,16 +60,17 @@ public class RefundServiceImpl implements RefundService {
         }
         //之前订单里面的总金额减掉退款的金额
         payDO.setPayAmount(payDO.getTotalAmount() - requestParam.getRefundAmount());
-        //创建退款单
+        //创建退款单,里面有需要退款车票的集合
         RefundCreateDTO refundCreateDTO = BeanUtil.convert(requestParam, RefundCreateDTO.class);
         refundCreateDTO.setPaySn(payDO.getPaySn());
+        //远程调用车票服务查询出对应车票,用于构建退款单的信息
         createRefund(refundCreateDTO);
-        // 策略模式：通过策略模式封装退款渠道和退款场景，用户退款时动态选择对应的退款组件
+        //策略模式：通过策略模式封装退款渠道和退款场景，用户退款时动态选择对应的退款组件
         RefundCommand refundCommand = BeanUtil.convert(payDO, RefundCommand.class);
         refundCommand.setPayAmount(new BigDecimal(requestParam.getRefundAmount()));
         RefundRequest refundRequest = RefundRequestConvert.command2RefundRequest(refundCommand);
         RefundResponse result = abstractStrategyChoose.chooseAndExecuteResp(refundRequest.buildMark(), refundRequest);
-        //修改支付表里面的记录
+        //修改支付单里面的金额和支付状态
         payDO.setStatus(result.getStatus());
         LambdaUpdateWrapper<PayDO> updateWrapper = Wrappers.lambdaUpdate(PayDO.class)
                 .eq(PayDO::getOrderSn, requestParam.getOrderSn());

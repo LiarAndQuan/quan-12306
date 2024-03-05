@@ -72,6 +72,7 @@ public class AliRefundNativeHandler extends AbstractRefundHandler implements Abs
         AlipayConfig alipayConfig = BeanUtil.convert(aliPayProperties, AlipayConfig.class);
         AlipayClient alipayClient = new DefaultAlipayClient(alipayConfig);
         AlipayTradeRefundModel model = new AlipayTradeRefundModel();
+        //设置订单号,交易号,退款金额
         model.setOutTradeNo(aliRefundRequest.getOrderSn());
         model.setTradeNo(aliRefundRequest.getTradeNo());
         BigDecimal payAmount = aliRefundRequest.getPayAmount();
@@ -81,6 +82,7 @@ public class AliRefundNativeHandler extends AbstractRefundHandler implements Abs
         AlipayTradeRefundRequest request = new AlipayTradeRefundRequest();
         request.setBizModel(model);
         try {
+            //发起退款
             AlipayTradeRefundResponse response = alipayClient.execute(request);
             String responseJson = JSONObject.toJSONString(response);
             log.info("发起支付宝退款，订单号：{}，交易凭证号：{}，退款金额：{} \n调用退款响应：\n\n{}\n",

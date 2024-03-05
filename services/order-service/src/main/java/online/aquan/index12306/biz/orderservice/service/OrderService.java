@@ -66,7 +66,7 @@ public interface OrderService {
     void statusReversal(OrderStatusReversalDTO requestParam);
 
     /**
-     * 设置支付时间和支付类型
+     * 设置支付时间和支付渠道
      *
      * @param requestParam 请求参数
      */
