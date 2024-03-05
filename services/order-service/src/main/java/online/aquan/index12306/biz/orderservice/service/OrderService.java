@@ -59,14 +59,14 @@ public interface OrderService {
     PageResponse<TicketOrderDetailSelfRespDTO> pageSelfTicketOrder(TicketOrderSelfPageQueryReqDTO requestParam);
 
     /**
-     * 订单状态反转
+     * 修改订单状态为已支付
      *
      * @param requestParam 请求参数
      */
     void statusReversal(OrderStatusReversalDTO requestParam);
 
     /**
-     * 支付结果回调订单
+     * 设置支付时间和支付类型
      *
      * @param requestParam 请求参数
      */
