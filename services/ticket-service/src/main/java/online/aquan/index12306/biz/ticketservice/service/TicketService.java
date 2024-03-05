@@ -21,7 +21,9 @@ import com.baomidou.mybatisplus.extension.service.IService;
 import online.aquan.index12306.biz.ticketservice.dao.entity.TicketDO;
 import online.aquan.index12306.biz.ticketservice.dto.req.CancelTicketOrderReqDTO;
 import online.aquan.index12306.biz.ticketservice.dto.req.PurchaseTicketReqDTO;
+import online.aquan.index12306.biz.ticketservice.dto.req.RefundTicketReqDTO;
 import online.aquan.index12306.biz.ticketservice.dto.req.TicketPageQueryReqDTO;
+import online.aquan.index12306.biz.ticketservice.dto.resp.RefundTicketRespDTO;
 import online.aquan.index12306.biz.ticketservice.dto.resp.TicketPageQueryRespDTO;
 import online.aquan.index12306.biz.ticketservice.dto.resp.TicketPurchaseRespDTO;
 import online.aquan.index12306.biz.ticketservice.remote.dto.PayInfoRespDTO;
@@ -78,4 +80,11 @@ public interface TicketService extends IService<TicketDO> {
      */
     PayInfoRespDTO getPayInfo(String orderSn);
 
+    /**
+     * 公共退款接口
+     *
+     * @param requestParam 退款请求参数
+     * @return 退款返回详情
+     */
+    RefundTicketRespDTO commonTicketRefund(RefundTicketReqDTO requestParam);
 }

@@ -18,14 +18,19 @@
 package online.aquan.index12306.biz.ticketservice.remote;
 
 import online.aquan.index12306.biz.ticketservice.dto.req.CancelTicketOrderReqDTO;
+import online.aquan.index12306.biz.ticketservice.dto.req.TicketOrderItemQueryReqDTO;
 import online.aquan.index12306.biz.ticketservice.remote.dto.TicketOrderCreateRemoteReqDTO;
 import online.aquan.index12306.biz.ticketservice.remote.dto.TicketOrderDetailRespDTO;
+import online.aquan.index12306.biz.ticketservice.remote.dto.TicketOrderPassengerDetailRespDTO;
 import online.aquan.index12306.framework.starter.convention.result.Result;
 import org.springframework.cloud.openfeign.FeignClient;
+import org.springframework.cloud.openfeign.SpringQueryMap;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
+
+import java.util.List;
 
 @FeignClient(value = "index12306-order${unique-name:}-service", url = "${aggregation.remote-url:}")
 public interface TicketOrderRemoteService {
@@ -65,5 +70,11 @@ public interface TicketOrderRemoteService {
      */
     @PostMapping("/api/order-service/order/ticket/close")
     Result<Boolean> closeTickOrder(@RequestBody CancelTicketOrderReqDTO requestParam);
+
+    /**
+     * 跟据子订单记录id查询车票子订单详情
+     */
+    @GetMapping("/api/order-service/order/item/ticket/query")
+    Result<List<TicketOrderPassengerDetailRespDTO>> queryTicketItemOrderById(@SpringQueryMap TicketOrderItemQueryReqDTO requestParam);
 
 }

@@ -15,26 +15,37 @@
  * limitations under the License.
  */
 
-package online.aquan.index12306.biz.ticketservice.common.enums;
+package online.aquan.index12306.biz.ticketservice.remote.dto;
+
+import lombok.Data;
+import online.aquan.index12306.biz.ticketservice.common.enums.RefundTypeEnum;
+
+import java.util.List;
 
 /**
- * 购票相关责任链 Mark 枚举
+ * 退款请求入参数实体
  *
  */
-public enum TicketChainMarkEnum {
+@Data
+public class RefundReqDTO {
 
     /**
-     * 车票查询过滤器
+     * 订单号
      */
-    TRAIN_QUERY_FILTER,
+    private String orderSn;
 
     /**
-     * 车票购买过滤器
+     * 退款类型枚举
      */
-    TRAIN_PURCHASE_TICKET_FILTER,
+    private RefundTypeEnum refundTypeEnum;
 
     /**
-     * 车票退款过滤器
+     * 退款金额
      */
-    TRAIN_REFUND_TICKET_FILTER
+    private Integer refundAmount;
+
+    /**
+     * 部分退款车票详情集合
+     */
+    private List<TicketOrderPassengerDetailRespDTO> refundDetailReqDTOList;
 }

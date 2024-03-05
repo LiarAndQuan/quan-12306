@@ -20,7 +20,9 @@ package online.aquan.index12306.biz.ticketservice.controller;
 import lombok.RequiredArgsConstructor;
 import online.aquan.index12306.biz.ticketservice.dto.req.CancelTicketOrderReqDTO;
 import online.aquan.index12306.biz.ticketservice.dto.req.PurchaseTicketReqDTO;
+import online.aquan.index12306.biz.ticketservice.dto.req.RefundTicketReqDTO;
 import online.aquan.index12306.biz.ticketservice.dto.req.TicketPageQueryReqDTO;
+import online.aquan.index12306.biz.ticketservice.dto.resp.RefundTicketRespDTO;
 import online.aquan.index12306.biz.ticketservice.dto.resp.TicketPageQueryRespDTO;
 import online.aquan.index12306.biz.ticketservice.dto.resp.TicketPurchaseRespDTO;
 import online.aquan.index12306.biz.ticketservice.remote.dto.PayInfoRespDTO;
@@ -95,4 +97,11 @@ public class TicketController {
         return Results.success(ticketService.getPayInfo(orderSn));
     }
 
+    /**
+     * 公共退款接口
+     */
+    @PostMapping("/api/ticket-service/ticket/refund")
+    public Result<RefundTicketRespDTO> commonTicketRefund(@RequestBody RefundTicketReqDTO requestParam) {
+        return Results.success(ticketService.commonTicketRefund(requestParam));
+    }
 }

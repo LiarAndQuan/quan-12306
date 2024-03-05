@@ -17,24 +17,32 @@
 
 package online.aquan.index12306.biz.ticketservice.common.enums;
 
+import lombok.Getter;
+import lombok.RequiredArgsConstructor;
+
 /**
- * 购票相关责任链 Mark 枚举
+ * 退款类型枚举
  *
  */
-public enum TicketChainMarkEnum {
+@Getter
+@RequiredArgsConstructor
+public enum RefundTypeEnum {
 
     /**
-     * 车票查询过滤器
+     * 部分退款
      */
-    TRAIN_QUERY_FILTER,
+    PARTIAL_REFUND(11, 0, "PARTIAL_REFUND", "部分退款"),
 
     /**
-     * 车票购买过滤器
+     * 全部退款
      */
-    TRAIN_PURCHASE_TICKET_FILTER,
+    FULL_REFUND(12, 1, "FULL_REFUND", "全部退款");
 
-    /**
-     * 车票退款过滤器
-     */
-    TRAIN_REFUND_TICKET_FILTER
+    private final Integer code;
+
+    private final Integer type;
+
+    private final String name;
+
+    private final String value;
 }

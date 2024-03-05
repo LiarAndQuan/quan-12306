@@ -18,6 +18,7 @@
 package online.aquan.index12306.biz.ticketservice.service.impl;
 
 import cn.hutool.core.collection.CollUtil;
+import cn.hutool.core.collection.CollectionUtil;
 import cn.hutool.core.map.MapUtil;
 import cn.hutool.core.util.StrUtil;
 import com.alibaba.fastjson2.JSON;
@@ -29,6 +30,7 @@ import com.github.benmanes.caffeine.cache.Caffeine;
 import com.google.common.collect.Lists;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import online.aquan.index12306.biz.ticketservice.common.enums.RefundTypeEnum;
 import online.aquan.index12306.biz.ticketservice.common.enums.SourceEnum;
 import online.aquan.index12306.biz.ticketservice.common.enums.TicketChainMarkEnum;
 import online.aquan.index12306.biz.ticketservice.common.enums.TicketStatusEnum;
@@ -38,18 +40,14 @@ import online.aquan.index12306.biz.ticketservice.dto.domain.PurchaseTicketPassen
 import online.aquan.index12306.biz.ticketservice.dto.domain.RouteDTO;
 import online.aquan.index12306.biz.ticketservice.dto.domain.SeatClassDTO;
 import online.aquan.index12306.biz.ticketservice.dto.domain.TicketListDTO;
-import online.aquan.index12306.biz.ticketservice.dto.req.CancelTicketOrderReqDTO;
-import online.aquan.index12306.biz.ticketservice.dto.req.PurchaseTicketReqDTO;
-import online.aquan.index12306.biz.ticketservice.dto.req.TicketPageQueryReqDTO;
+import online.aquan.index12306.biz.ticketservice.dto.req.*;
+import online.aquan.index12306.biz.ticketservice.dto.resp.RefundTicketRespDTO;
 import online.aquan.index12306.biz.ticketservice.dto.resp.TicketOrderDetailRespDTO;
 import online.aquan.index12306.biz.ticketservice.dto.resp.TicketPageQueryRespDTO;
 import online.aquan.index12306.biz.ticketservice.dto.resp.TicketPurchaseRespDTO;
 import online.aquan.index12306.biz.ticketservice.remote.PayRemoteService;
 import online.aquan.index12306.biz.ticketservice.remote.TicketOrderRemoteService;
-import online.aquan.index12306.biz.ticketservice.remote.dto.PayInfoRespDTO;
-import online.aquan.index12306.biz.ticketservice.remote.dto.TicketOrderCreateRemoteReqDTO;
-import online.aquan.index12306.biz.ticketservice.remote.dto.TicketOrderItemCreateRemoteReqDTO;
-import online.aquan.index12306.biz.ticketservice.remote.dto.TicketOrderPassengerDetailRespDTO;
+import online.aquan.index12306.biz.ticketservice.remote.dto.*;
 import online.aquan.index12306.biz.ticketservice.service.SeatService;
 import online.aquan.index12306.biz.ticketservice.service.TicketService;
 import online.aquan.index12306.biz.ticketservice.service.TrainStationService;
@@ -100,7 +98,7 @@ public class TicketServiceImpl extends ServiceImpl<TicketMapper, TicketDO> imple
     private final SeatMarginCacheLoader seatMarginCacheLoader;
     private final AbstractChainContext<PurchaseTicketReqDTO> purchaseTicketAbstractChainContext;
     private final ConfigurableEnvironment environment;
- 
+    private final AbstractChainContext<RefundTicketReqDTO> refundReqDTOAbstractChainContext;
     private final TrainSeatTypeSelector trainSeatTypeSelector;
     private final TicketOrderRemoteService ticketOrderRemoteService;
     private final SeatService seatService;
@@ -304,12 +302,13 @@ public class TicketServiceImpl extends ServiceImpl<TicketMapper, TicketDO> imple
     }
 
     /*
-    * Caffeine 是一个 Java 缓存库，用于在应用程序中实现高效的内存缓存。
-    * 它提供了一个功能强大而高性能的缓存实现，可以用于缓存各种类型的数据，如对象、方法调用的结果等。
-    * */
+     * Caffeine 是一个 Java 缓存库，用于在应用程序中实现高效的内存缓存。
+     * 它提供了一个功能强大而高性能的缓存实现，可以用于缓存各种类型的数据，如对象、方法调用的结果等。
+     * */
     private final Cache<String, ReentrantLock> localLockMap = Caffeine.newBuilder()
             .expireAfterWrite(1, TimeUnit.DAYS)
             .build();
+
     @Override
     public TicketPurchaseRespDTO purchaseTicketsV2(PurchaseTicketReqDTO requestParam) {
         // 责任链模式，验证 1：参数必填 2：参数正确性 3：乘客是否已买当前车次等...
@@ -517,6 +516,59 @@ public class TicketServiceImpl extends ServiceImpl<TicketMapper, TicketDO> imple
     @Override
     public PayInfoRespDTO getPayInfo(String orderSn) {
         return payRemoteService.getPayInfo(orderSn).getData();
+    }
+
+    public RefundTicketRespDTO commonTicketRefund(RefundTicketReqDTO requestParam) {
+        // 责任链模式，验证 1：参数必填
+        refundReqDTOAbstractChainContext.handler(TicketChainMarkEnum.TRAIN_REFUND_TICKET_FILTER.name(), requestParam);
+        //检查车票订单和车票子订单是否都存在
+        Result<online.aquan.index12306.biz.ticketservice.remote.dto.TicketOrderDetailRespDTO> orderDetailRespDTOResult = ticketOrderRemoteService.queryTicketOrderByOrderSn(requestParam.getOrderSn());
+        if (!orderDetailRespDTOResult.isSuccess() && Objects.isNull(orderDetailRespDTOResult.getData())) {
+            throw new ServiceException("车票订单不存在");
+        }
+        //获取这个订单所有的乘车人详情
+        online.aquan.index12306.biz.ticketservice.remote.dto.TicketOrderDetailRespDTO ticketOrderDetailRespDTO = orderDetailRespDTOResult.getData();
+        List<TicketOrderPassengerDetailRespDTO> passengerDetails = ticketOrderDetailRespDTO.getPassengerDetails();
+        if (CollectionUtil.isEmpty(passengerDetails)) {
+            throw new ServiceException("车票子订单不存在");
+        }
+        RefundReqDTO refundReqDTO = new RefundReqDTO();
+        //如果是部分退款
+        if (RefundTypeEnum.PARTIAL_REFUND.getType().equals(requestParam.getType())) {
+            TicketOrderItemQueryReqDTO ticketOrderItemQueryReqDTO = new TicketOrderItemQueryReqDTO();
+            //订单id
+            ticketOrderItemQueryReqDTO.setOrderSn(requestParam.getOrderSn());
+            //子订单id集合
+            ticketOrderItemQueryReqDTO.setOrderItemRecordIds(requestParam.getSubOrderRecordIdReqList());
+            //根据订单id和子订单id集合查询出车票子订单详情
+            Result<List<TicketOrderPassengerDetailRespDTO>> queryTicketItemOrderById = ticketOrderRemoteService.queryTicketItemOrderById(ticketOrderItemQueryReqDTO);
+            //过滤掉不存在这门订单的乘车人
+            List<TicketOrderPassengerDetailRespDTO> partialRefundPassengerDetails = passengerDetails.stream()
+                    .filter(item -> queryTicketItemOrderById.getData().contains(item))
+                    .collect(Collectors.toList());
+            //设置退款类型为部分退款
+            refundReqDTO.setRefundTypeEnum(RefundTypeEnum.PARTIAL_REFUND);
+            //设置部分退款车票详情
+            refundReqDTO.setRefundDetailReqDTOList(partialRefundPassengerDetails);
+        } else if (RefundTypeEnum.FULL_REFUND.getType().equals(requestParam.getType())) {
+            //如果是全部退款
+            refundReqDTO.setRefundTypeEnum(RefundTypeEnum.FULL_REFUND);
+            //设置全部乘车人的车票
+            refundReqDTO.setRefundDetailReqDTOList(passengerDetails);
+        }
+        if (CollectionUtil.isNotEmpty(passengerDetails)) {
+            Integer partialRefundAmount = passengerDetails.stream()
+                    .mapToInt(TicketOrderPassengerDetailRespDTO::getAmount)
+                    .sum();
+            refundReqDTO.setRefundAmount(partialRefundAmount);
+        }
+        refundReqDTO.setOrderSn(requestParam.getOrderSn());
+        //调用退款接口
+        Result<RefundRespDTO> refundRespDTOResult = payRemoteService.commonRefund(refundReqDTO);
+        if (!refundRespDTOResult.isSuccess() && Objects.isNull(refundRespDTOResult.getData())) {
+            throw new ServiceException("车票订单退款失败");
+        }
+        return null; // 暂时返回空实体
     }
 
 }
