@@ -25,7 +25,6 @@ import java.util.List;
 
 /**
  * 站点计算工具
- *
  */
 public final class StationCalculateUtil {
 
@@ -72,13 +71,13 @@ public final class StationCalculateUtil {
         if (startIndex == -1 || endIndex == -1 || startIndex >= endIndex) {
             return takeoutStationList;
         }
-        if (startIndex != 0) {
-            for (int i = 0; i < startIndex; i++) {
-                for (int j = 1; j < stations.size() - startIndex; j++) {
-                    takeoutStationList.add(new RouteDTO(stations.get(i), stations.get(startIndex + j)));
-                }
+        //出发站之前的每一个站点都需要扣减出发站+1~列车终点站的票,因为中间票被买去了
+        for (int i = 0; i < startIndex; i++) {
+            for (int j = 1; j < stations.size() - startIndex; j++) {
+                takeoutStationList.add(new RouteDTO(stations.get(i), stations.get(startIndex + j)));
             }
         }
+        //出发点-结束点的站点都需要减去自身一直到结束的票
         for (int i = startIndex; i <= endIndex; i++) {
             for (int j = i + 1; j < stations.size() && i < endIndex; j++) {
                 takeoutStationList.add(new RouteDTO(stations.get(i), stations.get(j)));
