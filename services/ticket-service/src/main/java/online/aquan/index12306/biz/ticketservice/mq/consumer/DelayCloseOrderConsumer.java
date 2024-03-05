@@ -121,7 +121,6 @@ public final class DelayCloseOrderConsumer implements RocketMQListener<MessageWr
                                 .increment(TRAIN_STATION_REMAINING_TICKET + keySuffix, String.valueOf(seatType), trainPurchaseTicketRespDTOList.size());
                     });
                 });
-                //todo 注释
                 TicketOrderDetailRespDTO ticketOrderDetail = BeanUtil.convert(delayCloseOrderEvent, TicketOrderDetailRespDTO.class);
                 ticketOrderDetail.setPassengerDetails(BeanUtil.convert(delayCloseOrderEvent.getTrainPurchaseTicketResults(), TicketOrderPassengerDetailRespDTO.class));
                 ticketAvailabilityTokenBucket.rollbackInBucket(ticketOrderDetail);

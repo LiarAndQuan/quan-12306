@@ -59,7 +59,6 @@ import static online.aquan.index12306.biz.ticketservice.common.constant.RedisKey
 
 /**
  * 列车车票余量令牌桶，应对海量并发场景下满足并行、限流以及防超卖等场景
- *todo 注释   
  */
 @Slf4j
 @Component

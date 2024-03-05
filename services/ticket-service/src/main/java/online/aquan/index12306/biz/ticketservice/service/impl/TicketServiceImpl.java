@@ -147,7 +147,7 @@ public class TicketServiceImpl extends ServiceImpl<TicketMapper, TicketDO> imple
         }
         // 接着就是查询所有满足条件的列车的基本信息
         List<TicketListDTO> seatResults = new ArrayList<>();
-        // 列车详细查询，Key Prefix + 起始城市_终点城市_日期
+        // 列车详细查询，Key Prefix + 起始城市_终点城市
         String buildRegionTrainStationHashKey = String.format(REGION_TRAIN_STATION, stationDetails.get(0), stationDetails.get(1));
         // 从缓存中看看是否有列车基本信息
         Map<Object, Object> regionTrainStationAllMap = stringRedisTemplate.opsForHash().entries(buildRegionTrainStationHashKey);
@@ -472,7 +472,7 @@ public class TicketServiceImpl extends ServiceImpl<TicketMapper, TicketDO> imple
     public void cancelTicketOrder(CancelTicketOrderReqDTO requestParam) {
         //调用远程服务取消这个订单
         Result<Void> cancelOrderResult = ticketOrderRemoteService.cancelTicketOrder(requestParam);
-        //如果取消成功,并且ticket cache update的类型不等于binlog
+        //如果取消成功,并且ticket cache update的类型不等于binlog,即不通过binlog保证缓存一致性
         if (cancelOrderResult.isSuccess() && !StrUtil.equals(ticketAvailabilityCacheUpdateType, "binlog")) {
             //根据订单号查询一下这个订单详情
             Result<online.aquan.index12306.biz.ticketservice.remote.dto.TicketOrderDetailRespDTO> ticketOrderDetailResult = ticketOrderRemoteService.queryTicketOrderByOrderSn(requestParam.getOrderSn());
