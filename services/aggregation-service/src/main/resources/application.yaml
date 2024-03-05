@@ -93,3 +93,8 @@ management:
   metrics:
     tags:
       application: ${spring.application.name}
+
+ticket:
+  availability:
+    cache-update:
+      type: binlog
