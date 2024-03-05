@@ -1,5 +1,6 @@
 package online.aquan.index12306.biz.payservice.service;
 
+import online.aquan.index12306.biz.payservice.dto.PayCallbackReqDTO;
 import online.aquan.index12306.biz.payservice.dto.PayInfoRespDTO;
 import online.aquan.index12306.biz.payservice.dto.PayRespDTO;
 import online.aquan.index12306.biz.payservice.dto.base.PayRequest;
@@ -30,5 +31,12 @@ public interface PayService {
      * @return 支付返回详情
      */
     PayRespDTO commonPay(PayRequest requestParam);
+
+    /**
+     * 支付单回调
+     *
+     * @param requestParam 回调支付单实体
+     */
+    void callbackPay(PayCallbackReqDTO requestParam);
 
 }
