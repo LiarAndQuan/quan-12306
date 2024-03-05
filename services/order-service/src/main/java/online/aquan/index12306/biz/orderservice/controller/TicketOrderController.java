@@ -18,10 +18,10 @@ import java.util.List;
 @RestController
 @RequiredArgsConstructor
 public class TicketOrderController {
-    
-    private OrderService orderService;
-    private OrderItemService orderItemService;
-    
+
+    private final OrderService orderService;
+    private final OrderItemService orderItemService;
+
     /**
      * 车票订单创建
      */
@@ -37,6 +37,7 @@ public class TicketOrderController {
     public Result<Boolean> closeTickOrder(@RequestBody CancelTicketOrderReqDTO requestParam) {
         return Results.success(orderService.closeTickOrder(requestParam));
     }
+
     /**
      * 车票订单取消
      */
