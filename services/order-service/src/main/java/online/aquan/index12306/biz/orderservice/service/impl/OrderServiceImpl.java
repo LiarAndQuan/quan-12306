@@ -17,11 +17,13 @@ import online.aquan.index12306.biz.orderservice.dao.entity.OrderItemDO;
 import online.aquan.index12306.biz.orderservice.dao.entity.OrderItemPassengerDO;
 import online.aquan.index12306.biz.orderservice.dao.mapper.OrderItemMapper;
 import online.aquan.index12306.biz.orderservice.dao.mapper.OrderMapper;
+import online.aquan.index12306.biz.orderservice.dto.domain.OrderStatusReversalDTO;
 import online.aquan.index12306.biz.orderservice.dto.req.*;
 import online.aquan.index12306.biz.orderservice.dto.resp.TicketOrderDetailRespDTO;
 import online.aquan.index12306.biz.orderservice.dto.resp.TicketOrderDetailSelfRespDTO;
 import online.aquan.index12306.biz.orderservice.dto.resp.TicketOrderPassengerDetailRespDTO;
 import online.aquan.index12306.biz.orderservice.mq.event.DelayCloseOrderEvent;
+import online.aquan.index12306.biz.orderservice.mq.event.PayResultCallbackOrderEvent;
 import online.aquan.index12306.biz.orderservice.mq.produce.DelayCloseOrderSendProduce;
 import online.aquan.index12306.biz.orderservice.remote.UserRemoteService;
 import online.aquan.index12306.biz.orderservice.remote.dto.UserQueryActualRespDTO;
@@ -269,5 +271,59 @@ public class OrderServiceImpl implements OrderService {
             BeanUtil.convertIgnoreNullAndBlank(orderItemDO, actualResult);
             return actualResult;
         });
+    }
+
+    @Override
+    public void statusReversal(OrderStatusReversalDTO requestParam) {
+        //获取订单
+        LambdaQueryWrapper<OrderDO> queryWrapper = Wrappers.lambdaQuery(OrderDO.class)
+                .eq(OrderDO::getOrderSn, requestParam.getOrderSn());
+        OrderDO orderDO = orderMapper.selectOne(queryWrapper);
+        if (orderDO == null) {
+            throw new ServiceException(OrderCanalErrorCodeEnum.ORDER_CANAL_UNKNOWN_ERROR);
+        } else if (orderDO.getStatus() != OrderStatusEnum.PENDING_PAYMENT.getStatus()) {
+            throw new ServiceException(OrderCanalErrorCodeEnum.ORDER_CANAL_STATUS_ERROR);
+        }
+        RLock lock = redissonClient.getLock(StrBuilder.create("order:status-reversal:order_sn_").append(requestParam.getOrderSn()).toString());
+        if (!lock.tryLock()) {
+            log.warn("订单重复修改状态，状态反转请求参数：{}", JSON.toJSONString(requestParam));
+        }
+        try {
+            //修改订单状态为已支付
+            OrderDO updateOrderDO = new OrderDO();
+            updateOrderDO.setStatus(requestParam.getOrderStatus());
+            LambdaUpdateWrapper<OrderDO> updateWrapper = Wrappers.lambdaUpdate(OrderDO.class)
+                    .eq(OrderDO::getOrderSn, requestParam.getOrderSn());
+            int updateResult = orderMapper.update(updateOrderDO, updateWrapper);
+            if (updateResult <= 0) {
+                throw new ServiceException(OrderCanalErrorCodeEnum.ORDER_STATUS_REVERSAL_ERROR);
+            }
+            //修改订单item状态
+            OrderItemDO orderItemDO = new OrderItemDO();
+            orderItemDO.setStatus(requestParam.getOrderItemStatus());
+            LambdaUpdateWrapper<OrderItemDO> orderItemUpdateWrapper = Wrappers.lambdaUpdate(OrderItemDO.class)
+                    .eq(OrderItemDO::getOrderSn, requestParam.getOrderSn());
+            int orderItemUpdateResult = orderItemMapper.update(orderItemDO, orderItemUpdateWrapper);
+            if (orderItemUpdateResult <= 0) {
+                throw new ServiceException(OrderCanalErrorCodeEnum.ORDER_STATUS_REVERSAL_ERROR);
+            }
+        } finally {
+            lock.unlock();
+        }
+    }
+
+    @Override
+    public void payCallbackOrder(PayResultCallbackOrderEvent requestParam) {
+        //设置支付时间和支付类型
+        OrderDO updateOrderDO = new OrderDO();
+        updateOrderDO.setPayTime(requestParam.getGmtPayment());
+        updateOrderDO.setPayType(requestParam.getChannel());
+        LambdaUpdateWrapper<OrderDO> updateWrapper = Wrappers.lambdaUpdate(OrderDO.class)
+                .eq(OrderDO::getOrderSn, requestParam.getOrderSn());
+        //更新订单
+        int updateResult = orderMapper.update(updateOrderDO, updateWrapper);
+        if (updateResult <= 0) {
+            throw new ServiceException(OrderCanalErrorCodeEnum.ORDER_STATUS_REVERSAL_ERROR);
+        }
     }
 }

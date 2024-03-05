@@ -1,11 +1,13 @@
 package online.aquan.index12306.biz.orderservice.service;
 
+import online.aquan.index12306.biz.orderservice.dto.domain.OrderStatusReversalDTO;
 import online.aquan.index12306.biz.orderservice.dto.req.CancelTicketOrderReqDTO;
 import online.aquan.index12306.biz.orderservice.dto.req.TicketOrderCreateReqDTO;
 import online.aquan.index12306.biz.orderservice.dto.req.TicketOrderPageQueryReqDTO;
 import online.aquan.index12306.biz.orderservice.dto.req.TicketOrderSelfPageQueryReqDTO;
 import online.aquan.index12306.biz.orderservice.dto.resp.TicketOrderDetailRespDTO;
 import online.aquan.index12306.biz.orderservice.dto.resp.TicketOrderDetailSelfRespDTO;
+import online.aquan.index12306.biz.orderservice.mq.event.PayResultCallbackOrderEvent;
 import online.aquan.index12306.framework.starter.convention.page.PageResponse;
 
 public interface OrderService {
@@ -55,4 +57,19 @@ public interface OrderService {
      * @return 本人车票订单集合
      */
     PageResponse<TicketOrderDetailSelfRespDTO> pageSelfTicketOrder(TicketOrderSelfPageQueryReqDTO requestParam);
+
+    /**
+     * 订单状态反转
+     *
+     * @param requestParam 请求参数
+     */
+    void statusReversal(OrderStatusReversalDTO requestParam);
+
+    /**
+     * 支付结果回调订单
+     *
+     * @param requestParam 请求参数
+     */
+    void payCallbackOrder(PayResultCallbackOrderEvent requestParam);
+
 }
